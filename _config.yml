@@ -30,10 +30,12 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  zodibell
 
 # Build settings
-source "https://rubygems.org"
+source: "https://rubygems.org"
 
 gem "github-pages", group: :jekyll_plugins
 gem "jekyll-include-cache", group: :jekyll_plugins
+
+# Jekyll settings
 remote_theme: "mmistakes/minimal-mistakes@4.26.2"
 plugins:
   - jekyll-feed
