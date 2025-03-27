@@ -1,6 +1,17 @@
 # zodibell.github.io
 Zodi's GitHub Site
 
+# Personal Reminders
+Here are some things you need to fix:
+- Pick better fonts - https://fonts.google.com/ 
+- Match the header and footer color with the shade of dark purple in the logo (see Canva). 
+- The "featured" and "tagline" sections need to be centered and proper fonts applied. 
+- The blog post images need to render with the proper CSS styling. (They are rendering full size currently.)
+- Everything on the home page is left-aligned. It should be centered.
+- The tag section needs work. They need to be clickable, and the collection needs to display at the bottom of the home page. 
+- The footer is funky. Fix it ASAP.
+- The posts layout is funky, but will probably resolve itself once I fix default layout, tags, and fonts. 
+
 # Documentation
 
 ## Steps to Dynamically Display Blog Posts
