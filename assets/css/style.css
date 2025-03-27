@@ -1,0 +1,235 @@
+/* General styles */
+body {
+    font-family: Garamond;
+    line-height: 1.8;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background: #f9f9f9; /* Light background for a clean look */
+  }
+  
+  .wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem; /* Add padding for better spacing */
+  }
+
+  .wrapper2 {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem; /* Add padding for better spacing */
+  }
+
+ /* Header styling */ 
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #45026f;
+    color: #fff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  }
+  
+  .logo img {
+    max-height: 50px;
+  }
+  
+  header nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 1rem;
+    margin: 0; /* Ensures centering */
+  }
+  
+  header nav ul li {
+    display: inline;
+    margin: 0 10px;
+  }
+  
+  header nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  header nav ul li a:hover {
+    color: #ffd700; /* Modern gold hover color */
+  
+/* Main content */
+  main {
+    padding: 2rem;
+    max-width: 1200px; /* Limits width for better readability */
+    margin: 0 auto; /* Centers content */
+    text-align: center; /* Ensures text inside main is centered */
+    flex: 1; /* Pushes the footer to the bottom */
+  }
+  
+  .post-title {
+    font-family: 'Arial', sans-serif;
+    font-size: 2rem; /* Adjust as needed */
+    font-weight: 700; /* Bold for emphasis */
+    color: #000000; 
+    text-align: center; /* Optional: Centers the title */
+    margin: 1rem 0;
+  }
+  
+  .featured {
+    text-align: center;
+    padding: 3rem 2rem;
+    max-width: 800px; /* Optional: Limit width for text */
+    margin: 0 auto; /* Centers the container */
+    background: #ece8f7;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
+    /* background: #f4f4f4; */
+    font-family: 'Carattere', cursive;
+      }
+      
+  .tagline {
+    text-align: center;
+    padding: 3rem 2rem;
+    /* background: #f4f4f4; */
+    font-family: 'Garamond', serif;
+    font-weight: 400;
+    font-style: normal; 
+  }
+  
+  /* Posts section */
+  .posts {
+    margin: 3rem auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    justify-items: center; /* Ensures items are centered inside the grid */
+  }
+  
+  .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+ /* If you have specific content that needs centering inside containers, use flex */ 
+  .post {
+    flex: 1;
+    text-align: center;
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+  }
+  
+  .post img {
+    width: 100%; /* Makes sure images scale responsively */
+    max-width: 200px; /* Ensures a consistent max width */
+    height: auto; /* Maintains aspect ratio */
+    display: block; /* Prevents inline spacing issues */
+    margin: 0 auto; /* Centers the image */
+    margin-bottom: 1rem;
+    border-radius: 8px; /* Optional: Adds rounded corners */
+    background: #ddd; /* Placeholder for missing images */
+  }
+  
+  .tag-button {
+    display: inline-block;
+    background: #007BFF;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    margin: 0.2rem;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  
+  .tag-button:hover {
+    background: #0056b3;
+  }
+
+
+  .tags {
+    margin-bottom: 0.5rem;
+  }
+  
+  .tags span {
+    display: inline-block;
+    background: #f4f4f4;
+    color: #333;
+    padding: 0.3rem 0.5rem;
+    margin-right: 0.2rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .date {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 0.5rem;
+  }
+  
+  .pagination {
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .pagination a {
+    display: inline-block;
+    margin: 0 0.5rem;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #007BFF;
+    border: 1px solid #007BFF;
+    border-radius: 5px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  
+  .pagination a:hover {
+    background: #007BFF;
+    color: #fff;
+  }
+  
+  .tags-buttons {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .tags-buttons button {
+    margin: 0.2rem;
+    padding: 0.5rem 1rem;
+    background: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .tag-button {
+    display: inline-block;
+    background: #007BFF;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    margin: 0.3rem;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+
+  .tags-buttons button:hover {
+    background: #0056b3;
+  }
+  
+  footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #45026f;
+    color: #fff;
+  }
+
+  /* Remove unused styles */
+  footer a {
+    color: #fff;
+    text-decoration: none;
+  }

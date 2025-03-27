@@ -37,10 +37,13 @@ repository: zodibell/zodibell.github.io
 github_username:  zodibell
 
 # Build settings
-source: "https://rubygems.org"
+# source: "https://rubygems.org"
+source: .
+destination: ./_site
 
-gem "github-pages", group: :jekyll_plugins
-gem "jekyll-include-cache", group: :jekyll_plugins
+# Gem Dependencies - Ensure Gemfile matches
+# gem "github-pages", group: :jekyll_plugins
+# gem "jekyll-include-cache", group: :jekyll_plugins
 
 # Jekyll settings
 remote_theme: "mmistakes/minimal-mistakes@4.26.2"
@@ -69,6 +72,18 @@ lunr:
 plugins:
   - jekyll-feed
   - jekyll-include-cache
+  - jekyll-paginate
+
+# Pagination settings
+paginate: 9 # Posts per page
+paginate_path: "/page:num"
+
+collections:
+  tags:
+    output: true
+
+sass:
+  sass_dir: "assets/css"  # Ensure this matches your actual SCSS file location
 
 # Exclude from processing.
 # The following items will not be processed, by default.
@@ -89,3 +104,7 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+exclude:
+  - pages 
+

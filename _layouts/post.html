@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <div class="logo">
+      <a href="{{ site.baseurl }}/">
+        <img src="{{ site.baseurl }}assets/images/zb_logo_1.png" alt="Blog Logo">
+      </a>
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="{{ site.baseurl }}/">Home</a></li>
+        <li><a href="{{ site.baseurl }}/about">About</a></li>
+        <li><a href="{{ site.baseurl }}/contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Blog Post Content -->
+  <main>
+    <article class="post-content">
+        <h1 class="post-title">{{ page.title }}</h1>
+      <p class="date">{{ page.date | date: "%B %d, %Y" }}</p>
+      <div class="tags">
+        {% for tag in page.tags %}
+          <span>#{{ tag }}</span>
+        {% endfor %}
+      </div>
+      <div class="content">
+        {{ content }}
+      </div>
+    </article>
+
+    <!-- Navigation to Previous and Next Posts -->
+    <nav class="post-navigation">
+      {% if page.previous %}
+        <a href="{{ page.previous.url }}" class="previous-post">&laquo; {{ page.previous.title }}</a>
+      {% endif %}
+      {% if page.next %}
+        <a href="{{ page.next.url }}" class="next-post">{{ page.next.title }} &raquo;</a>
+      {% endif %}
+    </nav>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© {{ site.time | date: "%Y" }} {{ site.title }} | Designed with ❤️</p>
+  </footer>
+</body>
+</html>
