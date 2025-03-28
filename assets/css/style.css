@@ -8,6 +8,12 @@ body {
     background: #f9f9f9; /* Light background for a clean look */
   }
   
+  html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
   .wrapper {
     max-width: 1200px;
     margin: 0 auto;
@@ -26,7 +32,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background-color: #45026f;
+    background-color: #352a39;
     color: #fff;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   }
@@ -87,7 +93,18 @@ body {
     /* background: #f4f4f4; */
     font-family: 'Carattere', cursive;
       }
-      
+  
+      .featured h1 {
+        font-size: 2.5rem;
+        color: #352a39;
+        margin-bottom: 1rem;
+    }
+    
+    .featured p {
+        font-size: 1.2rem;
+        color: #555;
+    }
+       
   .tagline {
     text-align: center;
     padding: 3rem 2rem;
@@ -107,6 +124,13 @@ body {
     justify-items: center; /* Ensures items are centered inside the grid */
   }
   
+  .posts img {
+    max-width: 100% !important; /* Forcefully constrain width */
+    height: auto !important; /* Maintain aspect ratio */
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
   .row {
     display: flex;
     justify-content: space-between;
@@ -116,6 +140,8 @@ body {
   
  /* If you have specific content that needs centering inside containers, use flex */ 
   .post {
+    max-width: 400px !important; /* Adjust width as needed */
+    margin: 0 auto !important; /* Centers post content */
     flex: 1;
     text-align: center;
     /* display: flex;
@@ -124,7 +150,7 @@ body {
   }
   
   .post img {
-    width: 100%; /* Makes sure images scale responsively */
+    width: 200px; /* Makes sure images scale responsively */
     max-width: 200px; /* Ensures a consistent max width */
     height: auto; /* Maintains aspect ratio */
     display: block; /* Prevents inline spacing issues */
@@ -132,6 +158,13 @@ body {
     margin-bottom: 1rem;
     border-radius: 8px; /* Optional: Adds rounded corners */
     background: #ddd; /* Placeholder for missing images */
+    object-fit: cover; 
+  }
+  
+  .post-image img {
+    max-width: 100%;
+    height: auto; 
+    object-fit: cover;
   }
   
   .tag-button {
@@ -221,12 +254,31 @@ body {
     background: #0056b3;
   }
   
-  footer {
-    text-align: center;
-    padding: 1rem;
-    background-color: #45026f;
-    color: #fff;
-  }
+/* Footer styling */
+footer {
+  text-align: center;
+  padding: 1.5rem 0;
+  background-color: #352a39;
+  color: #fff;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); /* Subtle top shadow */
+}
+
+
+footer p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: #ffd700;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+  
 
   /* Remove unused styles */
   footer a {

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: 
 title: "Home"
 --- 
 
@@ -16,22 +16,73 @@ title: "Home"
 </head>
 <body>
   <div class="wrapper">
-  <!-- Navigation -->
 
-   <!-- <header>
-    <div class="logo">
-      <a href="{{ site.baseurl }}/">
-        <img src="images/zb_logo_1.png" alt="Blog Logo">
-      </a>
-    </div>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="{{ site.baseurl }}/">Home</a></li>
-        <li><a href="{{ site.baseurl }}/about">About</a></li>
-        <li><a href="{{ site.baseurl }}/contact">Contact</a></li>
-      </ul>
-    </nav>
-  </header> -->
+<!-- Header -->
+<header style="
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #352a39;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+
+  <!-- Logo Section -->
+  <div class="logo">
+    <a href="{{ site.baseurl }}/">
+      <img src="assets/images/zb_logo_1.png" alt="Blog Logo" style="max-height: 50px;">
+    </a>
+  </div>
+
+  <!-- Navigation Section -->
+  <nav>
+    <ul style="
+      list-style: none;
+      padding: 0;
+      display: flex;
+      gap: 1rem;
+      margin: 0;">
+      
+      <li style="display: inline; margin: 0 10px;">
+        <a href="{{ site.baseurl }}/" style="
+          color: #fff;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s ease;"
+          onmouseover="this.style.color='#ffd700'" 
+          onmouseout="this.style.color='#fff'">
+          Home
+        </a>
+      </li>
+
+      <li style="display: inline; margin: 0 10px;">
+        <a href="{{ site.baseurl }}/about" style="
+          color: #fff;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s ease;"
+          onmouseover="this.style.color='#ffd700'" 
+          onmouseout="this.style.color='#fff'">
+          About
+        </a>
+      </li>
+
+      <li style="display: inline; margin: 0 10px;">
+        <a href="{{ site.baseurl }}/contact" style="
+          color: #fff;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.3s ease;"
+          onmouseover="this.style.color='#ffd700'" 
+          onmouseout="this.style.color='#fff'">
+          Contact
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+
+</header>
 
 
   <!-- Featured Section -->
@@ -58,16 +109,16 @@ title: "Home"
           <div class="row"> <!-- Start a new row every 3 posts -->
         {% endif %}
 
-      <div class="post">
-        <img src="{{ post.image }}" alt="{{ post.title }}">
-        <div class="tags">
-          {% for tag in post.tags %}
-            <span>#{{ tag }}</span>
-          {% endfor %}
+        <div class="post">
+          <div class="post-image">
+            <img src="{{ site.baseurl }}{{ post.image }}" alt="{{ post.title }}">
+          </div>
+          <div class="post-content">
+            <p class="date">{{ post.date | date: "%B %d, %Y" }}</p>
+            <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+          </div>
         </div>
-        <p class="date">{{ post.date | date: "%B %d, %Y" }}</p>
-        <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
-      </div>
+        
 
       {% if index_modulo == 0 %}
         </div> <!-- Close the row -->
@@ -102,10 +153,22 @@ title: "Home"
   </main>
   
 
-  <!-- Footer -->
-<!-- <footer>
-    <p>© {{ site.time | date: "%Y" }} {{ site.title }} | Designed with ❤️</p>
-  </footer> -->
+<!-- Footer Section -->
+
+<footer style="
+  text-align: center; 
+  padding: 1.5rem 0; 
+  background-color: #352a39; 
+  color: #fff; 
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);">
+  <p>&copy; 2024 Zodi Bell | Designed with ❤️</p>
+</footer>
+
+<!--<footer>
+  <div class="footer">
+  <p>&copy; {{ site.time | date: "%Y" }} {{ site.title }} | Designed with ❤️</p>
+  </div>
+</footer> -->
 </div>
 </body>
 </html>
