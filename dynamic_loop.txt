@@ -1,0 +1,26 @@
+<!-- Dynamic Loop through Posts 
+    {% for post in site.posts %}
+      {% if forloop.index <= 9 %}
+        {% assign index_modulo = forloop.index | modulo: 3 %}
+      
+        {% if index_modulo == 1 %}
+          <div class="row"> 
+        {% endif %}
+
+        <div class="post">
+          <div class="post-image">
+            <img src="{{ site.baseurl }}{{ post.image }}" alt="{{ post.title }}">
+          </div>
+          <div class="post-content">
+            <p class="date">{{ post.date | date: "%B %d, %Y" }}</p>
+            <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+          </div>
+        </div>
+        
+
+      {% if index_modulo == 0 %}
+        </div> 
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+</section> -->

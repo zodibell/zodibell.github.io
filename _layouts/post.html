@@ -1,13 +1,18 @@
-<!DOCTYPE html>
+---
+layout: default
+---
+
+ <!--  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page.title }} | {{ site.title }}</title>
   <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">
-</head>
+</head> -->
+
 <body>
-  <!-- Navigation -->
+  <!-- Navigation 
   <header>
     <div class="logo">
       <a href="{{ site.baseurl }}/">
@@ -21,10 +26,13 @@
         <li><a href="{{ site.baseurl }}/contact">Contact</a></li>
       </ul>
     </nav>
-  </header>
+  </header> -->
 
   <!-- Blog Post Content -->
-  <main>
+  <div class="wrapper2">
+
+    <main>
+    
     <article class="post-content">
         <h1 class="post-title">{{ page.title }}</h1>
       <p class="date">{{ page.date | date: "%B %d, %Y" }}</p>
@@ -47,13 +55,17 @@
         <a href="{{ page.next.url }}" class="next-post">{{ page.next.title }} &raquo;</a>
       {% endif %}
     </nav>
+  
   </main>
+</div>
 
-  <!-- Footer -->
+
+  <!-- Footer 
   <footer>
     <div class="footer">
     <p>© {{ site.time | date: "%Y" }} {{ site.title }} | Designed with ❤️</p>
     </div>
-  </footer>
+  </footer> -->
+
 </body>
-</html>
+

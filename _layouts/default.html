@@ -6,14 +6,17 @@
   <title>{{ page.title }} | {{ site.title }}</title>
   <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css">
 </head>
+
 <body>
+  
   <!-- Header Section -->
   <header>
-    <div class="logo">
-      <a href="{{ site.baseurl }}/">
-        <img src="{{ site.baseurl }}assets/images/zb_logo_1.png" alt="Blog Logo">
-      </a>
-    </div>
+    <div class="wrapper">
+      <div class="logo">
+        <a href="{{ site.baseurl }}/">
+          <img src="{{ site.baseurl }}assets/images/zb_logo_1.png" alt="Blog Logo">
+        </a>
+      </div>
     <nav>
       <ul class="nav-links">
         <li><a href="{{ site.baseurl }}/">Home</a></li>
@@ -21,20 +24,25 @@
         <li><a href="{{ site.baseurl }}/contact">Contact</a></li>
       </ul>
     </nav>
+    </div>
   </header>
-
-  
 
   <!-- Main Content -->
   <main>
+    <div class="wrapper">
     {{ content }}
+    </div>
   </main>
 
   <!-- Footer Section -->
   <footer>
-    <div class="footer">
-    <p>&copy; {{ site.time | date: "%Y" }} {{ site.title }} | Designed with ❤️</p>
+    <div class="wrapper">
+      <div class="footer">
+      <p>&copy; {{ site.time | date: "%Y" }} {{ site.title }} | Designed with ❤️</p>
+    </div>
     </div>
   </footer> 
+
 </body>
+
 </html>

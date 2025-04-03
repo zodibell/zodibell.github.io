@@ -29,8 +29,11 @@ description: A home for Zodi's musings.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://zodibell.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 repository: zodibell/zodibell.github.io
+logo: /assets/images/zb_logo_1.png
+paginate: 9  # Number of posts per page (optional)
+paginate_path: "/page:num/"
+permalink: /:categories/:title/
 
-# logo: image.png
 # breadcrumbs: true (use a category-based permalink structure before enabling)
 
 # twitter_username: jekyllrb
