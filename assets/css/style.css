@@ -77,10 +77,10 @@ body {
   
 /* Main content */
   main {
-    padding: 2rem;
+    padding: 1rem 2rem;
     max-width: 1200px; /* Limits width for better readability */
     margin: 0 auto; /* Centers content */
-    text-align: center; /* Ensures text inside main is centered */
+    text-align: left; /* Ensures text inside main is centered */
     flex: 1; /* Pushes the footer to the bottom */
   }
   
@@ -95,25 +95,26 @@ body {
   
   .featured {
     text-align: center;
-    padding: 3rem 2rem;
+    padding: 0rem 2rem;
     max-width: 800px; /* Optional: Limit width for text */
-    margin: 0 auto; /* Centers the container */
-    background: #ece8f7;
+    margin: 1rem auto 0; /* Centers the container */
+    background: none; 
     border-radius: 12px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
-    /* background: #f4f4f4; */
+    box-shadow: none; 
     font-family: 'Carattere', cursive;
       }
   
       .featured h1 {
-        font-size: 2.5rem;
+        font-family: 'Carattere', cursive;
+        font-size: 2.5rem; /* Adjust size as needed */
         color: #352a39;
         margin-bottom: 1rem;
     }
     
-    .featured p {
-        font-size: 1.2rem;
-        color: #555;
+      .featured p {
+        font-family: 'Garamond', serif;
+        font-size: 1.2rem; /* Adjust size as needed */
+        color: #555; /* Slightly darker for readability */
     }
        
   .tagline {

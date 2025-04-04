@@ -55,10 +55,10 @@ locale: "en-US"
 defaults:
   # _posts
   - scope:
-      path: ""
-      type: posts
+      path: "index.html"
+      type: "pages"
     values:
-      layout: single 
+      layout: "default" 
       author_profile: false
       share: true
       related: true 
@@ -84,6 +84,7 @@ paginate_path: "/page:num"
 collections:
   tags:
     output: true
+    permalink: /tags/:name/
 
 sass:
   sass_dir: "assets/css"  # Ensure this matches your actual SCSS file location
