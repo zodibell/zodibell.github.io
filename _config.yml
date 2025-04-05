@@ -33,6 +33,7 @@ logo: /assets/images/zb_logo_1.png
 paginate: 9  # Number of posts per page (optional)
 paginate_path: "/page:num/"
 permalink: /:categories/:title/
+future: true
 
 # breadcrumbs: true (use a category-based permalink structure before enabling)
 
@@ -78,6 +79,7 @@ plugins:
   - jekyll-include-cache
   - jekyll-paginate
   - ./generate_tags.rb
+  - jekyll-tags
 
 # Pagination settings
 paginate: 9 # Posts per page

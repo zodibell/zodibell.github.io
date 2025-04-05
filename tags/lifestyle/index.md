@@ -1,6 +1,6 @@
 ---
 layout: tag
-tag: Lifestyle
-title: Posts tagged "Lifestyle"
+tag: lifestyle
+title: Posts tagged "lifestyle"
 permalink: /tags/lifestyle/
 ---

@@ -1,6 +1,6 @@
 ---
 layout: tag
-tag: Test
-title: Posts tagged "Test"
+tag: test
+title: Posts tagged "test"
 permalink: /tags/test/
 ---

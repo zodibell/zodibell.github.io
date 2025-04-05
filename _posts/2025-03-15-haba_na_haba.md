@@ -2,9 +2,12 @@
 layout: post
 title: "Haba Na Haba"
 date: 2025-03-27
-tags: [Lifestyle, Inspiration]
+tags: 
+    - lifestyle
+    - inspiration
 image: "assets/images/haba_na_haba.png"
 ---
+
 One of my favorite Kiswahili proverbs is "Haba na haba hujaza kibaba." It means "Little by little fills the cup/pot." In other words, if you take things one day at a time, you will fulfill your goals. 
 
 I struggle with this. The spectre of perfectionism has haunted me all my life, sabotaging many of my goals. I have trouble pacing myself, as my brain often tells me that if I can't accomplish something amazing in a short amount of time, I can't do it at all. 

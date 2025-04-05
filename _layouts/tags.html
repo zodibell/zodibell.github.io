@@ -1,7 +1,17 @@
 ---
-layout: archive
+layout: default
 ---
 
-{{ content }}
-
-{% include posts-taxonomy.html taxonomies=site.tags %}
+<div class="tag-index">
+  <h1>Explore All Tags</h1>
+  <div class="tag-list">
+    <!-- Loop through all tags -->
+    {% for tag in site.tags %}
+      <div class="tag-item">
+        <a href="{{ site.baseurl }}/tags/{{ tag[0] | slugify }}/" class="tag-button">
+          {{ tag[0] }} ({{ tag[1] | size }})
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</div>

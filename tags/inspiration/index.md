@@ -1,6 +1,6 @@
 ---
 layout: tag
-tag: Inspiration
-title: Posts tagged "Inspiration"
+tag: inspiration
+title: Posts tagged "inspiration"
 permalink: /tags/inspiration/
 ---
