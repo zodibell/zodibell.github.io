@@ -127,8 +127,18 @@ body {
   }
   
   /* Posts section */
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  
+
   .posts {
-    display: flex;
+    /* display: flex; */
     flex-wrap: wrap; /* Allow wrapping */
     grid-template-columns: repeat(3, minmax(200px, 1fr)); /* Make posts more responsive */
     gap: 1rem; /* Reduce spacing */
@@ -148,7 +158,7 @@ body {
   }
 
   .row {
-    display: flex;
+    /* display: flex; */ 
     flex-wrap: wrap; /* Allows wrapping if not enough space */
     justify-content: space-between; /* Spaces posts evenly */
     gap: 1.5rem; /* Space between posts */
@@ -157,13 +167,40 @@ body {
  /* If you have specific content that needs centering inside containers, use flex */ 
  .post {
   width: calc(33.33% - 1rem); /* Ensures 3 posts per row with spacing */
-  max-width: 300px; /* Prevents oversized posts */
+  /* max-width: 300px;  Prevents oversized posts */
   padding: 1rem;
   text-align: center;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.post {
+  background: #fff;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.post img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 
 @media (max-width: 768px) {
   .posts {
@@ -193,7 +230,7 @@ body {
   object-fit: cover; /* Ensures cropping for consistent size */
 }
   
-  .tag-button {
+.posts .tag-button {
     display: inline-block;
     background: #007BFF;
     color: white;
@@ -203,7 +240,7 @@ body {
     text-decoration: none;
   }
   
-  .tag-button:hover {
+  .posts .tag-button:hover {
     background: #0056b3;
   }
 
@@ -247,6 +284,35 @@ body {
   .pagination a:hover {
     background: #007BFF;
     color: #fff;
+  }
+  
+  /* Tag Button Collection */
+
+  .all-tags {
+    margin-top: 3em;
+    text-align: center;
+  }
+  
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5em;
+    margin-top: 1em;
+  }
+  
+  .all-tags .tag-button {
+    background-color: #eee;
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+  }
+  
+  .all-tags .tag-button:hover {
+    background-color: #ccc;
   }
   
   .tags-buttons {

@@ -8,35 +8,43 @@ layout: default
   <p>Here, you'll find words from my brain.</p>
 </section>
 
-<!-- Grid of Posts -->
-<section class="posts">
-  <div class="row">
-    {% for post in site.posts limit: 9 %}
-      <div class="post">
-        <div class="post-image">
-          <img src="{{ post.image | relative_url }}" alt="{{ post.title }}">
-        </div>
-
-        <div class="tags">
-          {% for tag in post.tags %}
-            <a href="{{ site.baseurl }}/tags/{{ tag | slugify }}/" class="tag-button">{{ tag }}</a>
-          {% endfor %}
-        </div>
-
-        <p class="date">{{ post.date | date: "%B %d, %Y" }}</p>
-
-        <h2><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+<!-- Grid of Posts using CSS Grid -->
+<section class="posts-grid">
+  {% for post in site.posts limit: 9 %}
+    <div class="post">
+      <div class="post-image">
+        <img src="{{ post.image | relative_url }}" alt="{{ post.title }}">
       </div>
 
-      {% assign remainder = forloop.index0 | modulo: 3 %}
-      {% if remainder == 2 and forloop.last == false %}
-        </div><div class="row"> <!-- Close and start a new row every 3 posts -->
-      {% endif %}
-      
+      <div class="tags">
+        {% for tag in post.tags %}
+          <a href="{{ site.baseurl }}/tags/{{ tag | slugify }}/" class="tag-button">{{ tag }}</a>
+        {% endfor %}
+      </div>
+
+      <p class="date">{{ post.date | date: "%B %d, %Y" }}</p>
+
+      <h2><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+    </div>
+  {% endfor %}
+</section>
+
+
+
+<!-- All Tags Section -->
+<section class="all-tags">
+  <h2>Explore by Tag</h2>
+  <div class="tag-list">
+    {% assign all_tags = site.tags | sort %}
+    {% for tag in all_tags %}
+      {% assign tag_name = tag[0] %}
+      {% assign tag_posts = tag[1] %}
+      <a href="{{ site.baseurl }}/tags/{{ tag_name | slugify }}/" class="tag-button">
+        {{ tag_name }} ({{ tag_posts | size }})
+      </a>
     {% endfor %}
   </div>
 </section>
-
 
 
 
