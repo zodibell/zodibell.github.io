@@ -74,8 +74,10 @@ lunr:
 
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
   - jekyll-include-cache
   - jekyll-paginate
+  - ./generate_tags.rb
 
 # Pagination settings
 paginate: 9 # Posts per page
