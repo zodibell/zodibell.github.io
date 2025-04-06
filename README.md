@@ -4,8 +4,11 @@ Zodi's GitHub Site
 # Personal Reminders
 Here are some things you need to fix:
 - Pick better fonts - https://fonts.google.com/ 
-- The blog posts need to be cleaned up. The grid is not displaying correctly. 
-- The tag section needs work. They need to be clickable, and the collection needs to display at the bottom of the home page. I need dynamic pages for each tag. 
+- The blog post grid needs to be cleaned up. The grid is displaying correctly, but I think the images could be formatted better.
+- The blog post pages need the option for an image/banner. 
+- The blog post pages need a comment section. Make a Disqus account.
+- The tag section needs work. The collection needs to display in the "tags" page.  
+- Add links to Ko-fi, Beehiiv, & Privacy Policy to footer
 
 
 # Documentation

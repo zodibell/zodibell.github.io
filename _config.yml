@@ -86,6 +86,8 @@ paginate: 9 # Posts per page
 paginate_path: "/page:num"
 
 collections:
+  posts:
+    output: true
   tags:
     output: true
     permalink: /tags/:name/

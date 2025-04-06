@@ -12,11 +12,9 @@ permalink: /tags/
     <li>
       {{ post.title }} — Tags: 
       {% for tag in post.tags %}
-        <a href="{{ site.baseurl }}/tags/{{ tag | slugify }}/">
-          {{ tag }}
-        </a>
-        {% unless forloop.last %}, {% endunless %}
-      {% endfor %}
+  <a href="{{ site.baseurl }}/tags/{{ tag | slugify }}/">{{ tag }}</a>{% unless forloop.last %}, {% endunless %}
+{% endfor %}
+
     </li>
   {% endfor %}
 </ul>
@@ -33,6 +31,30 @@ permalink: /tags/
     </li>
   {% endfor %}
 </ul>
+
+<!-- Debug Tests 
+{% if site.tags %}
+  <p><strong>site.tags loaded ✅</strong></p>
+{% else %}
+  <p><strong>site.tags is empty ❌</strong></p>
+{% endif %}
+
+<h2>Debug Output</h2>
+<pre>
+  {% for tag in site.tags %}
+    {{ tag[0] }}: {{ tag[1] | size }} posts
+  {% endfor %}
+</pre>
+
+<h2>Test Tags List</h2>
+<ul>
+  {% for tag in site.tags %}
+    <li>
+      <a href="{{ site.baseurl }}/tags/{{ tag[0] | slugify }}/">{{ tag[0] }} ({{ tag[1] | size }})</a>
+    </li>
+  {% endfor %}
+</ul> -->
+
 
 <!-- List of Tags 
 <div class="tag-index">

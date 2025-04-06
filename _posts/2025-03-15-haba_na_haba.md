@@ -2,9 +2,9 @@
 layout: post
 title: "Haba Na Haba"
 date: 2025-03-27
-tags: 
-    - lifestyle
-    - inspiration
+tags:
+    - "lifestyle"
+    - "inspiration"
 image: "assets/images/haba_na_haba.png"
 ---
 
