@@ -327,6 +327,18 @@ main {
   transform: translateY(-2px);
 }
 
+/* Individual Post Styling */
+.post-image {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.post-image img {
+  display: inline-block;
+  max-width: 50%;
+  height: auto;
+  border-radius: 8px; /* optional */
+}
 
 /* Footer styling */
 footer {

@@ -4,11 +4,13 @@ Zodi's GitHub Site
 # Personal Reminders
 Here are some things you need to fix:
 - Pick better fonts - https://fonts.google.com/ 
+- **Important**: The tag section needs work. The alphabetized collection needs to display in the "tags" page.
 - The blog post grid needs to be cleaned up. The grid is displaying correctly, but I think the images could be formatted better.
-- The blog post pages need the option for an image/banner. 
-- The blog post pages need a comment section. Make a Disqus account.
-- The tag section needs work. The collection needs to display in the "tags" page.  
-- Add links to Ko-fi, Beehiiv, & Privacy Policy to footer
+- Eventually, maybe:
+  - The blog post pages need a comment section. Not Disqus, though. But maybe not because of spam?
+  - Add links to Ko-fi, Beehiiv, & Privacy Policy to footer?
+    - Work on Beehiiv template. This isn't urgent because I don't have an audience **yet.**
+  - How to dress things up. Adjust color? Gradients? Hovering? Shadows? 
 
 
 # Documentation
@@ -33,10 +35,16 @@ Each post should include front matter with metadata like `title`, `tags`, `date`
 ```
 ---
 layout: post
-title: "First Blog Post"
-date: 2025-03-15
-tags: [Lifestyle, Inspiration]
-image: "assets/images/post1.jpg"
+title: "Post Title"
+date: 2025-03-27
+tags:
+    - "lifestyle"
+    - "inspiration"
+image: "assets/images/post_image.png"
+image_alt: "Screenshot showing image centered in Jekyll layout"
+published: true  (Set to false to draft the post)
+excerpt: "Short description for summary cards."
+permalink: /custom-url/
 ---
 Blog content goes here.
 ```
