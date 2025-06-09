@@ -10,7 +10,7 @@ image: "assets/images/haba_na_haba.png"
 
 One of my favorite Kiswahili proverbs is "Haba na haba hujaza kibaba." It means "Little by little fills the cup/pot." In other words, if you take things one day at a time, you will fulfill your goals. {% include zb_bloc.html %}
 
-I struggle with this. The spectre of perfectionism has haunted me all my life, sabotaging many of my goals. I have trouble pacing myself, as my brain often tells me that if I can't accomplish something amazing in a short amount of time, I can't do it at all. 
+I struggle with this. The spectre of perfectionism has haunted me all my life, sabotaging many of my goals. I have trouble pacing myself, as my brain often tells me that if I can't accomplish something amazing in a short amount of time, I can't do it at all. {% include zb_bloc.html %}
 
 I decided a couple of years ago that this mendacity simply cannot follow me into the future. I have learned to force myself to tackle goals that *cannot* come to completion instantly. Building this blog from scratch is one example. Tinkering with code is helping me with my long-term career goals, and it also helps me remove my passive online support of platforms like Substack which uphold some <a href="https://www.thehandbasket.co/p/substack-announcement-bari-weiss-free-press">pretty nefarious stuff</a>. 
 
