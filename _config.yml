@@ -80,6 +80,7 @@ plugins:
   - jekyll-paginate
   - ./generate_tags.rb
   - jekyll-tags
+  - jekyll-target-blank
 
 # Pagination settings
 paginate: 9 # Posts per page
@@ -116,5 +117,7 @@ sass:
 #   - vendor/ruby/
 
 exclude:
-  - pages 
+  - pages
+  - drafts
+
 
