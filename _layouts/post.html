@@ -38,9 +38,12 @@ layout: default
         {% if page.image %}
           <div style="text-align: center; margin-bottom: 1.5rem;">
             <img src="{{ page.image | relative_url }}" alt="{{ page.image_alt | default: page.title | append: ' featured image' }}" style="max-width: 50%; height: auto; display: inline-block;">
+            {% if page.image_caption %}
+              <p style="font-size: 0.9rem; color: gray;">{{ page.image_caption }}</p>
+            {% endif %}
           </div>
         {% endif %}
-      
+
         <h1 class="post-title">{{ page.title }}</h1>
       
       <p class="date">{{ page.date | date: "%B %d, %Y" }}</p>
