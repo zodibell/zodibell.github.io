@@ -1,6 +1,6 @@
 /* General styles */
 body {
-  font-family: Garamond;
+  font-family: 'Georgia', serif;
   line-height: 1.8;
   margin: 0;
   padding: 0;
@@ -119,7 +119,7 @@ main {
 }
 
 .featured p {
-  font-family: 'Garamond', serif;
+  font-family: 'Georgia', serif;
   font-size: 1.2rem; /* Adjust size as needed */
   color: #555; /* Slightly darker for readability */
 }
@@ -128,7 +128,7 @@ main {
 .tagline {
   text-align: center;
   padding: 3rem 2rem;
-  font-family: 'Garamond', serif;
+  font-family: 'Georgia', serif;
   font-weight: 400;
 }
 
