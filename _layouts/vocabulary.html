@@ -1,0 +1,107 @@
+---
+layout: default
+title: Vocabulary
+---
+
+<h1 id="top">{{ page.title }}</h1>
+
+<p>Below is an alphabetically sorted inexhaustive list of terms and concepts that I’ve found interesting or useful.</p>
+
+<input id="search" placeholder="Search terms..." onkeyup="filterGlossary()">
+
+<script>
+function filterGlossary() {
+  let input = document.getElementById("search").value.toLowerCase();
+  let items = document.querySelectorAll(".glossary li");
+  items.forEach(li => {
+    li.style.display = li.textContent.toLowerCase().includes(input) ? "" : "none";
+  });
+}
+</script>
+
+{% assign sorted_terms = site.data.vocabulary | sort: "term" %}
+
+<!-- Collect and deduplicate first letters -->
+{% assign first_letters = "" %}
+{% for entry in sorted_terms %}
+  {% assign letter = entry.term | slice: 0, 1 | upcase %}
+  {% unless first_letters contains letter %}
+    {% assign first_letters = first_letters | append: letter | append: "," %}
+  {% endunless %}
+{% endfor %}
+{% assign available_letters = first_letters | split: "," | sort_natural %}
+
+<!-- A–Z navigation bar -->
+<nav class="alphabet-nav">
+  {% for letter in available_letters %}
+    {% if letter != "" %}
+      <a href="#{{ letter }}">{{ letter }}</a>
+    {% endif %}
+  {% endfor %}
+</nav>
+
+<ul class="glossary">
+  {% assign current_letter = "" %}
+  {% for entry in sorted_terms %}
+    {% assign first_letter = entry.term | slice: 0, 1 | upcase %}
+
+    {% if first_letter != current_letter %}
+      {% if current_letter != "" %}
+        </ul>
+        <p class="back-to-top"><a href="#top">↑ Back to top</a></p>
+      {% endif %}
+
+      <h2 id="{{ first_letter }}">{{ first_letter }}</h2>
+      <ul>
+      {% assign current_letter = first_letter %}
+    {% endif %}
+
+    <li id="{{ entry.term | downcase | replace: ' ', '-' }}">
+      <!-- Term -->
+      {% if entry.url %}
+        <strong>
+          <a href="{{ entry.url }}" target="_blank" rel="noopener noreferrer">
+            {{ entry.term }}
+          </a>
+        </strong>
+      {% else %}
+        <strong>{{ entry.term }}</strong>
+      {% endif %}
+
+      {% if entry.part_of_speech %}
+        <em>({{ entry.part_of_speech }})</em>
+      {% endif %}
+
+      {% if entry.short_definition %}
+        <p>{{ entry.short_definition }}</p>
+      {% endif %}
+
+      {% if entry.etymology %}
+        <p><strong>Etymology:</strong> {{ entry.etymology }}</p>
+      {% endif %}
+
+      <!-- Vocabulary tags -->
+      {% if entry.tags %}
+        <p class="page__taxonomy">
+          <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+          <span itemprop="keywords">
+            {% assign tags_sorted = entry.tags | sort_natural %}
+            {% for tag_word in tags_sorted %}
+              <a href="{{ '/tags/' | append: tag_word | slugify | append: '/' | relative_url }}"
+                 class="page__taxonomy-item p-category"
+                 rel="tag">{{ tag_word }}</a>{% unless forloop.last %}<span class="sep">, </span>{% endunless %}
+            {% endfor %}
+          </span>
+        </p>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+<p class="back-to-top"><a href="#top">↑ Back to top</a></p>
+
+<p>Attribution: Definitions are provided by
+  <a href="https://freedictionaryapi.com/" target="_blank" rel="noopener noreferrer">FreeDictionaryAPI.com</a>
+  and
+  <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia.org</a>.
+</p>

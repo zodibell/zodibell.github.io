@@ -293,6 +293,25 @@ main {
   background-color: #0056b3;
 }
 
+ul.all-tags {
+  column-count: 2; /* number of columns */
+  column-gap: 2rem; /* space between columns */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+ul.all-tags li {
+  break-inside: avoid; /* prevent items from splitting between columns */
+  padding: 4px 0;
+}
+
+@media (max-width: 600px) {
+  ul.all-tags {
+    column-count: 1; /* stack on small screens */
+  }
+}
+
 /* iFrames and Other Buttons */
 .iframe-container {
   text-align: center;
@@ -338,6 +357,48 @@ main {
   max-width: 50%;
   height: auto;
   border-radius: 8px; /* optional */
+}
+
+/* Vocabulary Page Styling */  
+.alphabet-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.alphabet-nav a {
+  text-decoration: none;
+  color: #352a39;
+}
+
+.alphabet-nav a:hover {
+  text-decoration: underline;
+}
+
+.back-to-top {
+  margin: 1rem 0;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.back-to-top a {
+  text-decoration: none;
+  color: #007acc;
+}
+
+.back-to-top a:hover {
+  text-decoration: underline;
+}
+
+.glossary a {
+  color: inherit;           /* Use the same color as surrounding text */
+  text-decoration: underline dotted; /* Subtle underline style */
+}
+.glossary a:hover {
+  color: #007acc;           /* Accent color on hover */
+  text-decoration: underline;
 }
 
 /* Footer styling */

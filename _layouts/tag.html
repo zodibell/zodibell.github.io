@@ -2,15 +2,46 @@
 layout: default
 ---
 
-<h1>Posts tagged with "{{ page.tag }}"</h1>
+<h1>Content tagged with "{{ page.tag }}"</h1>
 
-<ul>
-  {% for post in site.posts %}
-    {% if post.tags contains page.tag %}
+{%- comment -%}
+=== Blog posts ===
+{%- endcomment -%}
+{% assign tagged_posts = site.posts | where_exp: "post", "post.tags contains page.tag" %}
+{% if tagged_posts.size > 0 %}
+  <h2>Posts</h2>
+  <ul>
+    {% for post in tagged_posts %}
       <li>
         <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
         <span>— {{ post.date | date: "%B %d, %Y" }}</span>
       </li>
-    {% endif %}
-  {% endfor %}
-</ul>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{%- comment -%}
+=== Vocabulary entries ===
+{%- endcomment -%}
+{% assign vocab_entries = site.data.vocabulary | where_exp: "entry", "entry.tags contains page.tag" %}
+{% assign vocab_entries = vocab_entries | sort: "term" %}
+{% if vocab_entries.size > 0 %}
+  <h2>Vocabulary</h2>
+  <ul>
+    {% for entry in vocab_entries %}
+      <li>
+        {% if entry.url %}
+          <a href="{{ entry.url }}" target="_blank" rel="noopener">{{ entry.term }}</a>
+        {% else %}
+          {{ entry.term }}
+        {% endif %}
+        {% if entry.part_of_speech %}
+          <em>({{ entry.part_of_speech }})</em>
+        {% endif %}
+        {% if entry.short_definition %}
+          — {{ entry.short_definition }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

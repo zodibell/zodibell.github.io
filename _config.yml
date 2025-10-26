@@ -78,9 +78,10 @@ plugins:
   - jekyll-seo-tag
   - jekyll-include-cache
   - jekyll-paginate
-  - ./generate_tags.rb
   - jekyll-tags
   - jekyll-target-blank
+  - jekyll-archives
+
 
 # Pagination settings
 paginate: 9 # Posts per page
@@ -89,9 +90,19 @@ paginate_path: "/page:num"
 collections:
   posts:
     output: true
-  tags:
-    output: true
-    permalink: /tags/:name/
+
+tag_archive:
+  path: /tags/
+  type: liquid
+
+jekyll-archives:
+  enabled:
+    - tags
+  layouts:
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+
 
 sass:
   sass_dir: "assets/css"  # Ensure this matches your actual SCSS file location
