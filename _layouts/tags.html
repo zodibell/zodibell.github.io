@@ -8,7 +8,7 @@ layout: default
     <!-- Loop through all tags -->
     {% for tag in site.tags %}
       <div class="tag-item">
-        <a href="{{ site.baseurl }}/tags/{{ tag[0] | slugify }}/" class="tag-button">
+        <a href="{{ '/tags/' | append: tag[0] | slugify | append: '/' | relative_url }}" class="tag-button">
           {{ tag[0] }} ({{ tag[1] | size }})
         </a>
       </div>

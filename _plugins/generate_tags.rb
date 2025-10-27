@@ -45,7 +45,8 @@ puts "Found tags: #{sorted_tags.join(', ')}"
 # 4. Generate tag pages
 # -----------------------------
 sorted_tags.each do |tag|
-  slug = tag.downcase.strip.gsub(' ', '-').gsub(/[^\w-]/, '')
+  clean_tag = tag.downcase.strip.gsub(/^tags[-\/]/, '') # remove 'tags-' or 'tags/' prefix
+  slug = clean_tag.gsub(' ', '-').gsub(/[^\w-]/, '')
 
   tag_folder = File.join(TAGS_DIR, slug)
   FileUtils.mkdir_p(tag_folder)

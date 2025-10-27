@@ -93,7 +93,7 @@ collections:
 
 tag_archive:
   path: /tags/
-  type: liquid
+  type: jekyll-archives 
 
 jekyll-archives:
   enabled:
@@ -127,6 +127,9 @@ sass:
 #   - vendor/gems/
 #   - vendor/ruby/
 
+include:
+  - tags
+  
 exclude:
   - pages
   - drafts

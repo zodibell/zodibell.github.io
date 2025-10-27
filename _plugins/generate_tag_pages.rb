@@ -28,7 +28,8 @@ module Jekyll
 
       # --- Generate pages ---
       all_tags.each do |tag|
-        slug = tag.downcase.strip.gsub(/\s+/, '-').gsub(/[^\w-]/, '').gsub(/-+/, '-')
+        clean_tag = tag.downcase.strip.gsub(/^tags[-\/]/, '') # remove 'tags-' or 'tags/' prefix
+        slug = clean_tag.gsub(/\s+/, '-').gsub(/[^\w-]/, '').gsub(/-+/, '-')
         tag_folder = File.join(tags_dir, slug)
         FileUtils.mkdir_p(tag_folder)
 
