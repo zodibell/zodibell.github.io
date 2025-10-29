@@ -5,15 +5,17 @@ title: Vocabulary
 
 <h1 id="top">{{ page.title }}</h1>
 
-<p>Below is an alphabetically sorted inexhaustive list of terms and concepts that I’ve found interesting or useful.</p>
+<p>
+  Below is an alphabetically sorted, inexhaustive list of terms and concepts that I’ve found
+  interesting or useful. Use the search box to filter terms.
+</p>
 
-<input id="search" placeholder="Search terms..." onkeyup="filterGlossary()">
+<input id="search" placeholder="Search terms..." onkeyup="filterGlossary()" aria-label="Search vocabulary terms">
 
 <script>
 function filterGlossary() {
-  let input = document.getElementById("search").value.toLowerCase();
-  let items = document.querySelectorAll(".glossary li");
-  items.forEach(li => {
+  const input = document.getElementById("search").value.toLowerCase();
+  document.querySelectorAll(".glossary li").forEach(li => {
     li.style.display = li.textContent.toLowerCase().includes(input) ? "" : "none";
   });
 }
@@ -21,7 +23,7 @@ function filterGlossary() {
 
 {% assign sorted_terms = site.data.vocabulary | sort: "term" %}
 
-<!-- Collect and deduplicate first letters -->
+<!-- Collect first letters for navigation -->
 {% assign first_letters = "" %}
 {% for entry in sorted_terms %}
   {% assign letter = entry.term | slice: 0, 1 | upcase %}
@@ -31,8 +33,8 @@ function filterGlossary() {
 {% endfor %}
 {% assign available_letters = first_letters | split: "," | sort_natural %}
 
-<!-- A–Z navigation bar -->
-<nav class="alphabet-nav">
+<!-- A–Z navigation -->
+<nav class="alphabet-nav" aria-label="Alphabet navigation">
   {% for letter in available_letters %}
     {% if letter != "" %}
       <a href="#{{ letter }}">{{ letter }}</a>
@@ -50,7 +52,6 @@ function filterGlossary() {
         </ul>
         <p class="back-to-top"><a href="#top">↑ Back to top</a></p>
       {% endif %}
-
       <h2 id="{{ first_letter }}">{{ first_letter }}</h2>
       <ul>
       {% assign current_letter = first_letter %}
@@ -87,9 +88,14 @@ function filterGlossary() {
           <span itemprop="keywords">
             {% assign tags_sorted = entry.tags | sort_natural %}
             {% for tag_word in tags_sorted %}
-              <a href="{{ '/tags/' | append: tag_word | slugify | append: '/' | relative_url }}"
-                 class="page__taxonomy-item p-category"
-                 rel="tag">{{ tag_word }}</a>{% unless forloop.last %}<span class="sep">, </span>{% endunless %}
+              <a
+                href="{{ '/tags/' | relative_url }}{{ tag_word | slugify }}/"
+                class="page__taxonomy-item p-category"
+                rel="tag"
+                aria-label="View items tagged {{ tag_word }}"
+              >
+                {{ tag_word }}
+              </a>{% unless forloop.last %}<span class="sep">, </span>{% endunless %}
             {% endfor %}
           </span>
         </p>
@@ -100,8 +106,11 @@ function filterGlossary() {
 
 <p class="back-to-top"><a href="#top">↑ Back to top</a></p>
 
-<p>Attribution: Definitions are provided by
-  <a href="https://freedictionaryapi.com/" target="_blank" rel="noopener noreferrer">FreeDictionaryAPI.com</a>
-  and
-  <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia.org</a>.
+<p>
+  <small>
+    Attribution: Definitions are provided by
+    <a href="https://freedictionaryapi.com/" target="_blank" rel="noopener noreferrer">FreeDictionaryAPI.com</a>
+    and
+    <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia.org</a>.
+  </small>
 </p>

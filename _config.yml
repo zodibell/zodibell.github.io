@@ -73,15 +73,15 @@ search: true
 lunr:
   search_within_pages: true
 
+safe: false
+plugins_dir: _plugins
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-include-cache
   - jekyll-paginate
-  - jekyll-tags
   - jekyll-target-blank
   - jekyll-archives
-
 
 # Pagination settings
 paginate: 9 # Posts per page

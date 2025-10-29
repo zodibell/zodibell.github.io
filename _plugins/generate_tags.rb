@@ -1,66 +1,74 @@
-require 'yaml'
+# _plugins/generate_tags.rb
 require 'fileutils'
-require 'date'
+require 'yaml'
 
-TAGS_DIR = 'tags'
+puts "generate_tags.rb loaded successfully"
 
-# -----------------------------
-# 1. Collect tags from posts
-# -----------------------------
-posts = Dir.glob('_posts/**/*.{md,markdown}').select { |f| File.file?(f) }
-post_tags = Hash.new(0)
+Jekyll::Hooks.register :site, :post_read do |site|
+  puts "generate_tags.rb: running tag page generator (post_read hook)"
 
-posts.each do |post_path|
-  content = File.read(post_path)
-  if content =~ /\A---(.+?)---/m
-    front_matter = YAML.safe_load($1, permitted_classes: [Date])
-    Array(front_matter['tags']).each { |tag| post_tags[tag] += 1 }
-  end
-end
-
-# -----------------------------
-# 2. Collect tags from vocabulary
-# -----------------------------
-vocab_file = File.join('_data', 'vocabulary.yml')
-vocab_tags = Hash.new(0)
-
-if File.exist?(vocab_file)
-  vocab_data = YAML.load_file(vocab_file)
-  vocab_data.each do |entry|
-    Array(entry['tags']).each { |tag| vocab_tags[tag] += 1 }
-  end
-end
-
-# -----------------------------
-# 3. Merge tags and counts
-# -----------------------------
-all_tags = post_tags.merge(vocab_tags) { |tag, post_count, vocab_count| post_count + vocab_count }
-
-# Sort tags alphabetically
-sorted_tags = all_tags.keys.sort_by(&:downcase)
-
-puts "Found tags: #{sorted_tags.join(', ')}"
-
-# -----------------------------
-# 4. Generate tag pages
-# -----------------------------
-sorted_tags.each do |tag|
-  clean_tag = tag.downcase.strip.gsub(/^tags[-\/]/, '') # remove 'tags-' or 'tags/' prefix
-  slug = clean_tag.gsub(' ', '-').gsub(/[^\w-]/, '')
-
-  tag_folder = File.join(TAGS_DIR, slug)
-  FileUtils.mkdir_p(tag_folder)
-
-  File.open(File.join(tag_folder, 'index.md'), 'w') do |file|
-    file.puts <<~MARKDOWN
-      ---
-      layout: tag
-      tag: #{tag}
-      title: Posts tagged "#{tag}"
-      permalink: /tags/#{slug}/
-      ---
-    MARKDOWN
+  # -----------------------------
+  # 1. Collect tags from posts
+  # -----------------------------
+  post_tags = Hash.new(0)
+  site.posts.docs.each do |post|
+    Array(post.data['tags']).each { |t| post_tags[t.to_s.strip] += 1 }
   end
 
-  puts "Generated page for tag: #{tag} -> /tags/#{slug}/index.md (#{all_tags[tag]} items)"
+  # -----------------------------
+  # 2. Collect tags from vocabulary
+  # -----------------------------
+  vocab_tags = Hash.new(0)
+  if site.data['vocabulary'].is_a?(Array)
+    site.data['vocabulary'].each do |entry|
+      Array(entry['tags']).each { |t| vocab_tags[t.to_s.strip] += 1 }
+    end
+  end
+
+  # -----------------------------
+  # 3. Merge all tags
+  # -----------------------------
+  all_tags = post_tags.merge(vocab_tags) { |_tag, post_count, vocab_count| post_count + vocab_count }
+  sorted_tags = all_tags.keys.compact.uniq.sort_by(&:downcase)
+
+  puts "generate_tags.rb: Found tags: #{sorted_tags.join(', ')}"
+
+  # -----------------------------
+  # 4. Create tag pages in memory (no .md files)
+  # -----------------------------
+  sorted_tags.each do |raw_tag|
+    next if raw_tag.empty?
+
+    # Normalize slug: spaces → hyphens, remove punctuation
+    slug = raw_tag.downcase.strip.gsub(/\s+/, '-').gsub(/[^\w-]/, '')
+
+    dir = File.join('tags', slug)
+    filename = 'index.html'
+
+    page = Jekyll::PageWithoutAFile.new(site, site.source, dir, filename)
+    page.content = ""  # layout handles the content
+    page.data['layout'] = 'tag'
+    page.data['tag'] = raw_tag
+    page.data['title'] = "Posts tagged \"#{raw_tag}\""
+    page.data['permalink'] = "/tags/#{slug}/"
+
+    # Counts for use in layouts if needed
+    page.data['counts'] = {
+      'posts' => post_tags[raw_tag],
+      'vocabulary' => vocab_tags[raw_tag],
+      'total' => post_tags[raw_tag] + vocab_tags[raw_tag]
+    }
+
+    site.pages << page
+
+    puts "generate_tags.rb: added /tags/#{slug}/ (#{page.data['counts']['total']} items)"
+  end
+
+  # -----------------------------
+  # 5. Debug: list all generated tag pages
+  # -----------------------------
+  puts "🔍 Listing pages that match /tags/:"
+  site.pages.select { |p| p.url =~ %r{^/tags/} }.each do |p|
+    puts " - #{p.url} (layout: #{p.data['layout']})"
+  end
 end

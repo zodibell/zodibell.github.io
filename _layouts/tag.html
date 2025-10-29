@@ -4,9 +4,7 @@ layout: default
 
 <h1>Content tagged with "{{ page.tag }}"</h1>
 
-{%- comment -%}
-=== Blog posts ===
-{%- endcomment -%}
+<!-- 1️⃣ Blog posts for this tag -->
 {% assign tagged_posts = site.posts | where_exp: "post", "post.tags contains page.tag" %}
 {% if tagged_posts.size > 0 %}
   <h2>Posts</h2>
@@ -14,15 +12,13 @@ layout: default
     {% for post in tagged_posts %}
       <li>
         <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-        <span>— {{ post.date | date: "%B %d, %Y" }}</span>
+        {% if post.date %}<span> — {{ post.date | date: "%B %d, %Y" }}</span>{% endif %}
       </li>
     {% endfor %}
   </ul>
 {% endif %}
 
-{%- comment -%}
-=== Vocabulary entries ===
-{%- endcomment -%}
+<!-- 2️⃣ Vocabulary entries for this tag -->
 {% assign vocab_entries = site.data.vocabulary | where_exp: "entry", "entry.tags contains page.tag" %}
 {% assign vocab_entries = vocab_entries | sort: "term" %}
 {% if vocab_entries.size > 0 %}
@@ -35,13 +31,16 @@ layout: default
         {% else %}
           {{ entry.term }}
         {% endif %}
-        {% if entry.part_of_speech %}
-          <em>({{ entry.part_of_speech }})</em>
-        {% endif %}
-        {% if entry.short_definition %}
-          — {{ entry.short_definition }}
-        {% endif %}
+        {% if entry.part_of_speech %}<em>({{ entry.part_of_speech }})</em>{% endif %}
+        {% if entry.short_definition %} — {{ entry.short_definition }}{% endif %}
       </li>
     {% endfor %}
   </ul>
+{% endif %}
+
+<!-- 3️⃣ Optional: Show counts if needed -->
+{% assign post_count = tagged_posts | size %}
+{% assign vocab_count = vocab_entries | size %}
+{% if post_count > 0 or vocab_count > 0 %}
+  <p><strong>Summary:</strong> {{ post_count }} post{% if post_count != 1 %}s{% endif %}, {{ vocab_count }} vocab entry{% if vocab_count != 1 %}ies{% endif %}</p>
 {% endif %}
