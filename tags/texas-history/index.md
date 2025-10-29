@@ -1,6 +1,6 @@
 ---
 layout: tag
-title: Posts tagged "Texas History"
+title: Posts tagged "texas history"
 tag: texas history
 permalink: /tags/texas-history/
 ---

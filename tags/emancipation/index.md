@@ -1,6 +1,6 @@
 ---
 layout: tag
-title: Posts tagged "Emancipation"
+title: Posts tagged "emancipation"
 tag: emancipation
 permalink: /tags/emancipation/
 ---

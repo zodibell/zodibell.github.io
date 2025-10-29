@@ -1,6 +1,6 @@
 ---
 layout: tag
-title: Posts tagged "Juneteenth"
+title: Posts tagged "juneteenth"
 tag: juneteenth
 permalink: /tags/juneteenth/
 ---
