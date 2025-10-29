@@ -5,7 +5,10 @@ layout: default
 <h1>Content tagged with "{{ page.tag }}"</h1>
 
 <!-- 1️⃣ Blog posts for this tag -->
-{% assign tagged_posts = site.posts | where_exp: "post", "post.tags contains page.tag" %}
+ {% assign tag_key = page.tag | downcase %}
+
+{% assign tagged_posts = site.posts | where_exp: "post", "post.tags contains tag_key" %}
+
 {% if tagged_posts.size > 0 %}
   <h2>Posts</h2>
   <ul>
@@ -19,7 +22,8 @@ layout: default
 {% endif %}
 
 <!-- 2️⃣ Vocabulary entries for this tag -->
-{% assign vocab_entries = site.data.vocabulary | where_exp: "entry", "entry.tags contains page.tag" %}
+{% assign vocab_entries = site.data.vocabulary | where_exp: "entry", "entry.tags contains tag_key" %}
+
 {% assign vocab_entries = vocab_entries | sort: "term" %}
 {% if vocab_entries.size > 0 %}
   <h2>Vocabulary</h2>

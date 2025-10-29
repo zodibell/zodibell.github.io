@@ -48,7 +48,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     page = Jekyll::PageWithoutAFile.new(site, site.source, dir, filename)
     page.content = ""  # layout handles the content
     page.data['layout'] = 'tag'
-    page.data['tag'] = raw_tag
+    page.data['tag'] = raw_tag.downcase
     page.data['title'] = "Posts tagged \"#{raw_tag}\""
     page.data['permalink'] = "/tags/#{slug}/"
 
