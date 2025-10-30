@@ -21,7 +21,7 @@ function filterGlossary() {
 }
 </script>
 
-{% assign sorted_terms = site.data.vocabulary | sort: "term" %}
+{% assign sorted_terms = site.data.vocabulary_normalized | sort: "term_lc" %}
 
 <!-- Collect first letters for navigation -->
 {% assign first_letters = "" %}

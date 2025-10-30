@@ -24,7 +24,7 @@ layout: default
 <!-- 2️⃣ Vocabulary entries for this tag -->
 {% assign vocab_entries = site.data.vocabulary | where_exp: "entry", "entry.tags contains tag_key" %}
 
-{% assign vocab_entries = vocab_entries | sort: "term" %}
+{% assign vocab_entries = vocab_entries | sort: "term_lc" %}
 {% if vocab_entries.size > 0 %}
   <h2>Vocabulary</h2>
   <ul>

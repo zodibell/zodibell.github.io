@@ -1,8 +1,9 @@
+---
 - term: clerisy
   source_preference: dictionary
   short_definition: An elite group of intellectuals; learned people, the literati.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/clerisy
   tags:
@@ -10,178 +11,201 @@
   - adjectives
   - groups
   - positives
+  term_lc: clerisy
 - term: noumena
   source_preference: dictionary
   short_definition: A thing as it is independent of any conceptualization or perception
     by the human mind, postulated by practical reason but existing in a condition
     which is in principle unknowable and unexperienceable.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/noumena
   tags:
   - nouns
+  term_lc: noumena
 - term: roborant
   source_preference: dictionary
   short_definition: A restorative tonic.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/roborant
   tags:
   - nouns
   - positives
+  term_lc: roborant
 - term: segnity
   source_preference: dictionary
   short_definition: Sluggishness; negligence, slowness, slothfulness; also barrenness.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: Wiktionary.org
   url: https://en.wiktionary.org/wiki/segnity
   tags:
   - nouns
   - negatives
+  term_lc: segnity
 - term: sinecure
   source_preference: dictionary
   short_definition: A position that requires no work but still gives an ample payment;
     a cushy job.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/sinecure
   tags:
   - nouns
   - positives
+  term_lc: sinecure
 - term: gelid
   source_preference: dictionary
   short_definition: Very cold; icy or frosty.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/gelid
   tags:
   - adjectives
+  term_lc: gelid
 - term: meretricious
   ssource_preference: dictionary
-  hort_definition: null
+  hort_definition:
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/meretricious
   tags:
   - adjectives
   short_definition: Tastelessly gaudy; superficially attractive but having in reality
     no value or substance; falsely alluring.
+  term_lc: meretricious
 - term: esurient
   ssource_preference: dictionary
-  hort_definition: null
+  hort_definition:
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/esurient
   tags:
   - adjectives
   short_definition: One who is greedy or hungry.
+  term_lc: esurient
 - term: perspicacious
   source_preference: dictionary
   short_definition: Of acute discernment; having keen insight; mentally perceptive.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perspicacious
   tags:
   - adjectives
+  term_lc: perspicacious
 - term: cyclothymic
   source_preference: dictionary
   short_definition: Having mood swings between happy and sad.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Cyclothymia
   tags:
   - adjectives
+  term_lc: cyclothymic
 - term: perfidious
   source_preference: dictionary
   short_definition: Of, pertaining to, or representing perfidy; disloyal to what should
     command one's fidelity or allegiance.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perfidious
   tags:
   - adjectives
+  term_lc: perfidious
 - term: emulous
   source_preference: dictionary
   short_definition: Ambitious or competitive.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/emulous
   tags:
   - adjectives
+  term_lc: emulous
 - term: pellucid
   source_preference: dictionary
   short_definition: Allowing the passage of light; transparent.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/pellucid
   tags:
   - adjectives
+  term_lc: pellucid
 - term: effulgent
   source_preference: dictionary
   short_definition: Radiant, resplendent, shining.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/effulgent
   tags:
   - adjectives
+  term_lc: effulgent
 - term: stochastic
   source_preference: dictionary
   short_definition: Random, randomly determined.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/stochastic
   tags:
   - adjectives
+  term_lc: stochastic
 - term: insouciant
   source_preference: dictionary
   short_definition: Casually unconcerned; carefree, indifferent, nonchalant.
   part_of_speech: adjective
-  etymology: null
+  etymology:
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/insouciant
   tags:
   - adjectives
+  term_lc: insouciant
 - term: Gestapo
   source_preference: dictionary
-  short_definition: The official secret police of Nazi Germany and in German-occupied Europe.
+  short_definition: The official secret police of Nazi Germany and in German-occupied
+    Europe.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Gestapo
   tags:
   - nouns
   - negatives
   - fascism
+  term_lc: gestapo
 - term: fascism
   source_preference: dictionary
-  short_definition: A far-right, authoritarian, and ultranationalist political ideology and movement that rose to prominence in early-20th-century Europe.
+  short_definition: A far-right, authoritarian, and ultranationalist political ideology
+    and movement that rose to prominence in early-20th-century Europe.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Fascism
   tags:
   - nouns
   - fascism
   - politics
+  term_lc: fascism
 - term: communism
   source_preference: dictionary
-  short_definition: A political and economic ideology whose goal is the creation of a communist society, a socioeconomic order centered on common ownership of the means of production, distribution, and exchange that allocates products in society based on need.
+  short_definition: A political and economic ideology whose goal is the creation of
+    a communist society, a socioeconomic order centered on common ownership of the
+    means of production, distribution, and exchange that allocates products in society
+    based on need.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Communism
   tags:
@@ -190,11 +214,13 @@
   - politics
   - Marxism
   - antifascism
+  term_lc: communism
 - term: proletariat
   source_preference: dictionary
-  short_definition: Members of a society whose possession of significant economic value is their labor power.
+  short_definition: Members of a society whose possession of significant economic
+    value is their labor power.
   part_of_speech: noun
-  etymology: null
+  etymology:
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Proletariat
   tags:
@@ -203,3 +229,4 @@
   - politics
   - Marxism
   - antifascism
+  term_lc: proletariat
