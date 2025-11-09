@@ -155,3 +155,8 @@ html
   <h2><a href="/post1">First Blog Post</a></h2>
 </div>
 ```
+## Tag Structure
+### Vocabulary Words
+### Blog Posts
+### All Tags Page
+
