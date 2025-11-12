@@ -7,7 +7,6 @@
   url: https://www.thefreedictionary.com/clerisy
   tags:
   - nouns
-  - adjectives
   - groups
   - positives
 - term: noumena
@@ -62,26 +61,24 @@
   tags:
   - adjectives
 - term: meretricious
-  ssource_preference: dictionary
-  hort_definition: null
+  source_preference: dictionary
+  short_definition: Tastelessly gaudy; superficially attractive but having in reality
+    no value or substance; falsely alluring.
   part_of_speech: adjective
   etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/meretricious
   tags:
   - adjectives
-  short_definition: Tastelessly gaudy; superficially attractive but having in reality
-    no value or substance; falsely alluring.
 - term: esurient
-  ssource_preference: dictionary
-  hort_definition: null
-  part_of_speech: noun
+  source_preference: dictionary
+  short_definition: One who is greedy or hungry.
+  part_of_speech: adjective
   etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/esurient
   tags:
   - adjectives
-  short_definition: One who is greedy or hungry.
 - term: perspicacious
   source_preference: dictionary
   short_definition: Of acute discernment; having keen insight; mentally perceptive.
@@ -156,8 +153,9 @@
   tags:
   - adjectives
 - term: Gestapo
-  source_preference: dictionary
-  short_definition: The official secret police of Nazi Germany and in German-occupied Europe.
+  source_preference: wikipedia
+  short_definition: The official secret police of Nazi Germany and in German-occupied
+    Europe.
   part_of_speech: noun
   etymology: null
   source: Wikipedia.org
@@ -167,8 +165,9 @@
   - negatives
   - fascism
 - term: fascism
-  source_preference: dictionary
-  short_definition: A far-right, authoritarian, and ultranationalist political ideology and movement that rose to prominence in early-20th-century Europe.
+  source_preference: wikipedia
+  short_definition: A far-right, authoritarian, and ultranationalist political ideology
+    and movement that rose to prominence in early-20th-century Europe.
   part_of_speech: noun
   etymology: null
   source: Wikipedia.org
@@ -178,8 +177,11 @@
   - fascism
   - politics
 - term: communism
-  source_preference: dictionary
-  short_definition: A political and economic ideology whose goal is the creation of a communist society, a socioeconomic order centered on common ownership of the means of production, distribution, and exchange that allocates products in society based on need.
+  source_preference: wikipedia
+  short_definition: A political and economic ideology whose goal is the creation of
+    a communist society, a socioeconomic order centered on common ownership of the
+    means of production, distribution, and exchange that allocates products in society
+    based on need.
   part_of_speech: noun
   etymology: null
   source: Wikipedia.org
@@ -191,8 +193,9 @@
   - Marxism
   - antifascism
 - term: proletariat
-  source_preference: dictionary
-  short_definition: Members of a society whose possession of significant economic value is their labor power.
+  source_preference: wikipedia
+  short_definition: Members of a society whose possession of significant economic
+    value is their labor power.
   part_of_speech: noun
   etymology: null
   source: Wikipedia.org
@@ -203,3 +206,118 @@
   - politics
   - Marxism
   - antifascism
+- term: anarcho-syndicalism
+  source_preference: wikipedia
+  short_definition: An anarchist organizational model that centers trade unions as
+    a vehicle for class conflict.
+  part_of_speech: noun
+  etymology: null
+  source: Wikipedia.org
+  url: https://en.wikipedia.org/wiki/Anarcho-syndicalism
+  tags:
+  - nouns
+  - politics
+  - Marxism
+- term: inchoate
+  source_preference: dictionary
+  short_definition: Being in a beginning or early stage; incipient.
+  part_of_speech: adjective
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/inchoate
+  tags:
+  - adjectives
+- term: epulation
+  source_preference: dictionary
+  short_definition: (obsolete) A feast or banquet.
+  part_of_speech: noun
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/epulation
+  tags:
+  - nouns
+- term: espieglerie
+  source_preference: dictionary
+  short_definition: Impish or playful behaviour; mischief.
+  part_of_speech: noun
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/espieglerie
+  tags:
+  - nouns
+- term: eidolon
+  source_preference: dictionary
+  short_definition: An image or representation of an idea; a representation of an
+    ideal form; an apparition of some actual or imaginary entity, or of some aspect
+    of reality.
+  part_of_speech: noun
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/eidolon
+  tags:
+  - nouns
+- term: athanasia
+  source_preference: dictionary
+  short_definition: Immortality.
+  part_of_speech: noun
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/athanasia
+  tags:
+  - nouns
+- term: ostentiferous
+  source_preference: dictionary
+  short_definition: null
+  part_of_speech: adjective
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: null
+  tags:
+  - adjectives
+- term: perhorresce
+  source_preference: dictionary
+  short_definition: (rare, formal, ambitransitive) To shudder (at). [from 19th c.]
+  part_of_speech: verb
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/perhorresce
+  tags:
+  - noun
+- term: truckle
+  source_preference: dictionary
+  short_definition: To be servile or submissive.
+  part_of_speech: verb
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/truckle
+  tags:
+  - verbs
+- term: expostulate
+  source_preference: dictionary
+  short_definition: (intransitive) To protest or remonstrate; to reason earnestly
+    with a person on some impropriety of conduct [(often) with with].
+  part_of_speech: verb
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/expostulate
+  tags:
+  - verbs
+- term: solipsism
+  source_preference: dictionary
+  short_definition: (philosophy) The idea that the self is all that exists or that
+    can be proven to exist.
+  part_of_speech: noun
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/solipsism
+  tags:
+  - nouns
+- term: rebarbative
+  source_preference: dictionary
+  short_definition: Irritating, repellent.
+  part_of_speech: adjective
+  etymology: null
+  source: FreeDictionaryAPI.com
+  url: https://www.thefreedictionary.com/rebarbative
+  tags:
+  - adjectives
