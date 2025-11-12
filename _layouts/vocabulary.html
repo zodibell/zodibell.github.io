@@ -10,14 +10,32 @@ title: Vocabulary
   interesting or useful. Use the search box to filter terms.
 </p>
 
-<input id="search" placeholder="Search terms..." onkeyup="filterGlossary()" aria-label="Search vocabulary terms">
+<input
+  id="search"
+  class="search-box"
+  placeholder="🔍 Search terms..."
+  onkeyup="filterGlossary()"
+  aria-label="Search vocabulary terms"
+/>
+
+<div id="no-results" style="display:none;">
+  <em>No matching terms found.</em>
+</div>
 
 <script>
 function filterGlossary() {
   const input = document.getElementById("search").value.toLowerCase();
-  document.querySelectorAll(".glossary li").forEach(li => {
-    li.style.display = li.textContent.toLowerCase().includes(input) ? "" : "none";
+  const items = document.querySelectorAll(".glossary li");
+  let anyVisible = false;
+
+  items.forEach(li => {
+    const match = li.textContent.toLowerCase().includes(input);
+    li.style.display = match ? "" : "none";
+    li.classList.toggle("highlight", match && input !== "");
+    if (match) anyVisible = true;
   });
+
+  document.getElementById("no-results").style.display = anyVisible ? "none" : "block";
 }
 </script>
 
@@ -42,73 +60,71 @@ function filterGlossary() {
   {% endfor %}
 </nav>
 
-<ul class="glossary">
+<div class="glossary">
   {% assign current_letter = "" %}
   {% for entry in sorted_terms %}
     {% assign first_letter = entry.term | slice: 0, 1 | upcase %}
 
     {% if first_letter != current_letter %}
       {% if current_letter != "" %}
-        </ul>
+        </div>
         <p class="back-to-top"><a href="#top">↑ Back to top</a></p>
       {% endif %}
-      <h2 id="{{ first_letter }}">{{ first_letter }}</h2>
-      <ul>
+      <h2 id="{{ first_letter }}" class="letter-heading">{{ first_letter }}</h2>
+      <div class="letter-group">
       {% assign current_letter = first_letter %}
     {% endif %}
 
-    <li id="{{ entry.term | downcase | replace: ' ', '-' }}">
-      <!-- Term -->
-      {% if entry.url %}
-        <strong>
-          <a href="{{ entry.url }}" target="_blank" rel="noopener noreferrer">
+    <li class="term-card" id="{{ entry.term | downcase | replace: ' ', '-' }}">
+      <!-- Term Header -->
+      <header class="term-header">
+        {% if entry.url %}
+          <a href="{{ entry.url }}" target="_blank" rel="noopener noreferrer" class="term-link">
             {{ entry.term }}
           </a>
-        </strong>
-      {% else %}
-        <strong>{{ entry.term }}</strong>
-      {% endif %}
+        {% else %}
+          <span class="term">{{ entry.term }}</span>
+        {% endif %}
+        {% if entry.part_of_speech %}
+          <span class="pos">({{ entry.part_of_speech }})</span>
+        {% endif %}
+      </header>
 
-      {% if entry.part_of_speech %}
-        <em>({{ entry.part_of_speech }})</em>
-      {% endif %}
-
+      <!-- Short definition -->
       {% if entry.short_definition %}
-        <p>{{ entry.short_definition }}</p>
+        <p class="definition">{{ entry.short_definition }}</p>
       {% endif %}
 
+      <!-- Etymology -->
       {% if entry.etymology %}
-        <p><strong>Etymology:</strong> {{ entry.etymology }}</p>
+        <p class="etymology"><strong>Etymology:</strong> {{ entry.etymology }}</p>
       {% endif %}
 
       <!-- Vocabulary tags -->
       {% if entry.tags %}
-        <p class="page__taxonomy">
-          <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
-          <span itemprop="keywords">
-            {% assign tags_sorted = entry.tags | sort_natural %}
-            {% for tag_word in tags_sorted %}
-              <a
-                href="{{ '/tags/' | relative_url }}{{ tag_word | slugify }}/"
-                class="page__taxonomy-item p-category"
-                rel="tag"
-                aria-label="View items tagged {{ tag_word }}"
-              >
-                {{ tag_word }}
-              </a>{% unless forloop.last %}<span class="sep">, </span>{% endunless %}
-            {% endfor %}
-          </span>
-        </p>
+        <div class="tags">
+          {% assign tags_sorted = entry.tags | sort_natural %}
+          {% for tag_word in tags_sorted %}
+            <a
+              href="{{ '/tags/' | relative_url }}{{ tag_word | slugify }}/"
+              class="tag"
+              rel="tag"
+              aria-label="View items tagged {{ tag_word }}"
+            >
+              {{ tag_word }}
+            </a>
+          {% endfor %}
+        </div>
       {% endif %}
     </li>
   {% endfor %}
-</ul>
+</div>
 
 <p class="back-to-top"><a href="#top">↑ Back to top</a></p>
 
-<p>
+<p class="attribution">
   <small>
-    Attribution: Definitions are provided by
+    Definitions are provided by
     <a href="https://freedictionaryapi.com/" target="_blank" rel="noopener noreferrer">FreeDictionaryAPI.com</a>
     and
     <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">Wikipedia.org</a>.

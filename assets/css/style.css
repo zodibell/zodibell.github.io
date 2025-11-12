@@ -401,6 +401,143 @@ ul.all-tags li {
   text-decoration: underline;
 }
 
+/* Vocabulary cards */
+.term-card {
+  background: #fff; /* Matches your posts background */
+  border: 1px solid #e0dfe5; /* Light gray border */
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.term-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.term-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.term-link, .term {
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  color: #352a39;
+  text-decoration: none;
+}
+
+.term-link:hover {
+  color: #007acc;
+  text-decoration: underline;
+}
+
+.pos {
+  font-style: italic;
+  font-weight: 400;
+  color: #555;
+}
+
+.definition {
+  margin: 0.4rem 0;
+  color: #333;
+}
+
+.etymology {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.3rem;
+}
+
+/* Tags styled as pills */
+.tags {
+  margin-top: 0.6rem;
+}
+.tag {
+  display: inline-block;
+  background-color: #eef6ff;
+  color: #007acc;
+  padding: 0.25rem 0.6rem;
+  margin: 0.2rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+.tag:hover {
+  background-color: #dbeeff;
+}
+
+/* Search highlights */
+.highlight {
+  background-color: #fff9cc; /* subtle yellow highlight */
+  transition: background-color 1s ease;
+}
+
+/* Letter headings */
+.letter-heading {
+  border-bottom: 2px solid #ddd;
+  margin-top: 2rem;
+  color: #352a39;
+}
+
+/* Back to top links */
+.back-to-top {
+  text-align: right;
+  margin-top: 0.8rem;
+}
+
+.back-to-top a {
+  color: #007acc;
+  text-decoration: none;
+}
+
+.back-to-top a:hover {
+  text-decoration: underline;
+}
+
+/* A–Z navigation */
+.alphabet-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  font-weight: bold;
+}
+.alphabet-nav a {
+  text-decoration: none;
+  color: #352a39;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+.alphabet-nav a:hover {
+  background-color: #eef6ff;
+}
+
+/* Search box styling */
+.search-box {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin: 1rem 0 1.5rem 0;
+  font-size: 1rem;
+}
+
+/* No results message */
+#no-results {
+  font-style: italic;
+  color: #555;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+
 /* Footer styling */
 footer {
   width: 100%;
