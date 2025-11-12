@@ -60,49 +60,42 @@ function filterGlossary() {
   {% endfor %}
 </nav>
 
-<div class="glossary">
+<ul class="glossary">
   {% assign current_letter = "" %}
   {% for entry in sorted_terms %}
     {% assign first_letter = entry.term | slice: 0, 1 | upcase %}
 
     {% if first_letter != current_letter %}
       {% if current_letter != "" %}
-        </div>
+        </ul>
         <p class="back-to-top"><a href="#top">↑ Back to top</a></p>
       {% endif %}
       <h2 id="{{ first_letter }}" class="letter-heading">{{ first_letter }}</h2>
-      <div class="letter-group">
+      <ul>
       {% assign current_letter = first_letter %}
     {% endif %}
 
-    <li class="term-card" id="{{ entry.term | downcase | replace: ' ', '-' }}">
-      <!-- Term Header -->
-      <header class="term-header">
-        {% if entry.url %}
-          <a href="{{ entry.url }}" target="_blank" rel="noopener noreferrer" class="term-link">
-            {{ entry.term }}
-          </a>
-        {% else %}
-          <span class="term">{{ entry.term }}</span>
-        {% endif %}
-        {% if entry.part_of_speech %}
-          <span class="pos">({{ entry.part_of_speech }})</span>
-        {% endif %}
-      </header>
+    <li id="{{ entry.term | downcase | replace: ' ', '-' }}">
+      <!-- Term with part of speech -->
+      {% if entry.url %}
+        <strong class="term">
+          <a href="{{ entry.url }}" target="_blank" rel="noopener noreferrer">{{ entry.term }}</a>
+        </strong>
+      {% else %}
+        <strong class="term">{{ entry.term }}</strong>
+      {% endif %}
+      {% if entry.part_of_speech %}
+        <em>({{ entry.part_of_speech }})</em>
+      {% endif %}
 
       <!-- Short definition -->
       {% if entry.short_definition %}
         <p class="definition">{{ entry.short_definition }}</p>
       {% endif %}
 
-      <!-- Etymology -->
-      {% if entry.etymology %}
-        <p class="etymology"><strong>Etymology:</strong> {{ entry.etymology }}</p>
-      {% endif %}
-
       <!-- Vocabulary tags -->
       {% if entry.tags %}
-        <div class="tags">
+        <p class="tags-label"><strong>Tags:</strong>
           {% assign tags_sorted = entry.tags | sort_natural %}
           {% for tag_word in tags_sorted %}
             <a
@@ -112,13 +105,13 @@ function filterGlossary() {
               aria-label="View items tagged {{ tag_word }}"
             >
               {{ tag_word }}
-            </a>
+            </a>{% unless forloop.last %}, {% endunless %}
           {% endfor %}
-        </div>
+        </p>
       {% endif %}
     </li>
   {% endfor %}
-</div>
+</ul>
 
 <p class="back-to-top"><a href="#top">↑ Back to top</a></p>
 

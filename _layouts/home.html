@@ -38,17 +38,17 @@ layout: default
     <a href="{{ site.baseurl }}/tags/" class="purple-button">Explore by Tag</a>
   </h2>
   
-  <div class="tag-list">
+  <!-- <div class="tag-list">
     {% assign all_tags = site.tags | sort %}
     {% for tag in all_tags %}
       {% assign tag_name = tag[0] %}
-      {% assign tag_posts = tag[1] %}
+      {% assign tag_posts = tag[1] %} -->
       <!-- Display tag name with post count -->
-      <a href="{{ site.baseurl }}/tags/{{ tag_name | slugify }}/" class="tag-button">
+      <!-- <a href="{{ site.baseurl }}/tags/{{ tag_name | slugify }}/" class="tag-button">
         {{ tag_name }} ({{ tag_posts | size }})
       </a>
     {% endfor %}
-  </div>
+  </div> -->
 </section>
 
 

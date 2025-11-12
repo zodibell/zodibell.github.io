@@ -401,7 +401,14 @@ ul.all-tags li {
   text-decoration: underline;
 }
 
-/* Vocabulary cards */
+.attribution {
+  text-align: center;
+  margin-top: 2em;
+  border-top: 2px solid #ddd;
+  padding-top: 1em;
+}
+
+/* Vocabulary Cards */
 .term-card {
   background: #fff; /* Matches your posts background */
   border: 1px solid #e0dfe5; /* Light gray border */
@@ -459,17 +466,20 @@ ul.all-tags li {
 }
 .tag {
   display: inline-block;
-  background-color: #eef6ff;
-  color: #007acc;
-  padding: 0.25rem 0.6rem;
-  margin: 0.2rem;
-  border-radius: 9999px;
+  background-color: #eee;      /* Light gray background, matches home page tags */
+  color: #333;                 /* Dark text */
+  padding: 0.4em 0.8em;        /* Same padding as tag buttons */
+  margin: 0.2rem;              /* Small spacing between tags */
+  border-radius: 20px;         /* Rounded pill shape */
   font-size: 0.85rem;
   text-decoration: none;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
+
 .tag:hover {
-  background-color: #dbeeff;
+  background-color: #ccc;      /* Slightly darker gray on hover */
+  color: #333;                 /* Keep text color consistent */
+  text-decoration: none;
 }
 
 /* Search highlights */
@@ -487,7 +497,7 @@ ul.all-tags li {
 
 /* Back to top links */
 .back-to-top {
-  text-align: right;
+  text-align: left;
   margin-top: 0.8rem;
 }
 
@@ -537,6 +547,100 @@ ul.all-tags li {
   text-align: center;
 }
 
+
+/* Vocabulary terms */
+.term {
+  color: #352a39;       /* Dark purple */
+  font-size: 1.15rem;   /* Slightly larger */
+  font-weight: 700;
+}
+
+.pos {
+  font-style: italic;
+  font-weight: 400;
+  color: #555;
+  margin-left: 0.4rem;
+}
+
+.definition,
+.tags-label,
+.etymology {
+  margin-left: 1.5rem;  /* Indented under term */
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.definition {
+  color: #333;
+}
+
+.etymology {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.tags-label {
+  font-size: 0.9rem;
+}
+
+.tag {
+  color: #007acc;        /* Accent blue */
+  text-decoration: none;
+  margin-right: 0.3rem;
+}
+
+.tag:hover {
+  text-decoration: underline;
+}
+
+/* Highlight search matches */
+.highlight {
+  background-color: #fff9cc;
+}
+
+/* Letter headings */
+.letter-heading {
+  border-bottom: 2px solid #ddd;
+  margin-top: 2rem;
+  color: #352a39;
+}
+
+/* Columns on Tags Page */ 
+.tag-columns-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* ✅ Two equal-width columns */
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1em;
+}
+
+/* Each UL gets its own column */
+.tag-column {
+  list-style-type: disc;
+  padding-left: 1em;
+  margin: 0;
+}
+
+.tag-column li {
+  margin-bottom: 0.5em;
+}
+
+/* Responsive fallback: one column on smaller screens */
+@media (max-width: 768px) {
+  .tag-columns-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tag-columns-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1em;
+  width: 100%;
+  max-width: 100%; /* override narrow .wrapper */
+}
 
 /* Footer styling */
 footer {

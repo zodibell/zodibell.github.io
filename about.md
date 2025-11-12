@@ -16,8 +16,8 @@ permalink:
 <h3>Quick Facts</h3>
 <ul>
     <li>😄 <strong>Pronouns:</strong> she/her</li>
-    <li>👀 <strong>Hobbies:</strong> Crafts and skills that get me away from the computer and help me develop a sense of agency during the current global crash out (more gardening, sewing, archery, and canning in 2025).</li>
-    <li>💞️ <strong>Looking for:</strong> Connection with other late bloomers exploring their sexual identities, making career changes, and maintaining a sense of self despite it all.</li>
+    <li>👀 <strong>Hobbies:</strong> Crafts and skills that get me away from the computer and help me develop a sense of agency during the current global crash out (more gardening, sewing, archery, and canning).</li>
+    <li>💞️ <strong>Looking for:</strong> Connection with other late bloomers exploring their  identities, making career changes, and maintaining a sense of self despite it all.</li>
     <li>🤓 <strong>Interests:</strong> Vampires, folk practices, Black pop culture.</li>
 </ul>
 <h2 align="center">If you’d like me to write for your publication or platform, please email me at <a href="mailto:zodibell@proton.me">zodibell@proton.me</a>.</h2>

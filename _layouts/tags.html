@@ -41,31 +41,63 @@ title: All Tags
 
 <!-- 3️⃣ All Tags with counts -->
 <h2>All Tags</h2>
-{% assign post_tags_all = site.posts | map: 'tags' | compact | flatten %}
-{% assign post_tags_unique = post_tags_all | uniq %}
-{% assign all_tags = post_tags_unique | concat: vocab_tags_unique | uniq | sort_natural %}
+<div class="tag-columns-container">
+  {% assign post_tags_all = site.posts | map: 'tags' | compact | flatten %}
+  {% assign post_tags_unique = post_tags_all | uniq %}
+  {% assign all_tags = post_tags_unique | concat: vocab_tags_unique | uniq | sort_natural %}
 
-<ul>
-  {% for tag in all_tags %}
-    {% assign post_count = 0 %}
-    {% for post in site.posts %}
-      {% if post.tags contains tag %}
-        {% assign post_count = post_count | plus: 1 %}
-      {% endif %}
+  {% assign total_tags = all_tags | size %}
+  {% assign half = total_tags | divided_by: 2 | ceil %}
+  {% assign first_column = all_tags | slice: 0, half %}
+  {% assign second_column = all_tags | slice: half, total_tags %}
+
+  <ul class="tag-column">
+    {% for tag in first_column %}
+      {% assign post_count = 0 %}
+      {% for post in site.posts %}
+        {% if post.tags contains tag %}
+          {% assign post_count = post_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+
+      {% assign vocab_count = 0 %}
+      {% for entry in site.data.vocabulary %}
+        {% if entry.tags contains tag %}
+          {% assign vocab_count = vocab_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+
+      {% assign slug = tag | downcase | slugify %}
+      <li>
+        <a href="{{ '/tags/' | append: slug | append: '/' | relative_url }}">{{ tag }}</a>
+        {% if post_count > 0 %} ({{ post_count }} post{% if post_count > 1 %}s{% endif %}){% endif %}
+        {% if vocab_count > 0 %} ({{ vocab_count }} vocab){% endif %}
+      </li>
     {% endfor %}
+  </ul>
 
-    {% assign vocab_count = 0 %}
-    {% for entry in site.data.vocabulary %}
-      {% if entry.tags contains tag %}
-        {% assign vocab_count = vocab_count | plus: 1 %}
-      {% endif %}
+  <ul class="tag-column">
+    {% for tag in second_column %}
+      {% assign post_count = 0 %}
+      {% for post in site.posts %}
+        {% if post.tags contains tag %}
+          {% assign post_count = post_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+
+      {% assign vocab_count = 0 %}
+      {% for entry in site.data.vocabulary %}
+        {% if entry.tags contains tag %}
+          {% assign vocab_count = vocab_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+
+      {% assign slug = tag | downcase | slugify %}
+      <li>
+        <a href="{{ '/tags/' | append: slug | append: '/' | relative_url }}">{{ tag }}</a>
+        {% if post_count > 0 %} ({{ post_count }} post{% if post_count > 1 %}s{% endif %}){% endif %}
+        {% if vocab_count > 0 %} ({{ vocab_count }} vocab){% endif %}
+      </li>
     {% endfor %}
-
-    {% assign slug = tag | downcase | slugify %}
-    <li>
-      <a href="{{ '/tags/' | append: slug | append: '/' | relative_url }}">{{ tag }}</a>
-      {% if post_count > 0 %} ({{ post_count }} post{% if post_count > 1 %}s{% endif %}){% endif %}
-      {% if vocab_count > 0 %} ({{ vocab_count }} vocab){% endif %}
-    </li>
-  {% endfor %}
-</ul>
+  </ul>
+</div>
