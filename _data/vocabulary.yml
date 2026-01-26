@@ -190,7 +190,7 @@
   - nouns
   - fascism
   - politics
-  - marxism
+  - Marxism
   - antifascism
 - term: proletariat
   source_preference: wikipedia
@@ -204,7 +204,7 @@
   - nouns
   - groups
   - politics
-  - marxism
+  - Marxism
   - antifascism
 - term: anarcho-syndicalism
   source_preference: wikipedia
@@ -217,7 +217,7 @@
   tags:
   - nouns
   - politics
-  - marxism
+  - Marxism
 - term: inchoate
   source_preference: dictionary
   short_definition: Being in a beginning or early stage; incipient.
@@ -267,7 +267,7 @@
   - nouns
 - term: ostentiferous
   source_preference: dictionary
-  short_definition: null
+  short_definition: That which brings omens, monsters, or strange manifestations. 
   part_of_speech: adjective
   etymology: null
   source: FreeDictionaryAPI.com
@@ -282,7 +282,7 @@
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perhorresce
   tags:
-  - nouns
+  - noun
 - term: truckle
   source_preference: dictionary
   short_definition: To be servile or submissive.
@@ -321,15 +321,3 @@
   url: https://www.thefreedictionary.com/rebarbative
   tags:
   - adjectives
-- term: dialectical materialism
-  source_preference: wikipedia
-  short_definition: A materialist theory based on the writings of Karl Marx and Friedrich Engels which emphasizes the importance of real-world conditions and the presence of contradictions within and among social relations.
-  part_of_speech: noun
-  etymology: 
-  source: Wikipedia.org
-  url: https://en.wikipedia.org/wiki/Dialectical_materialism
-  tags:
-  - nouns
-  - marxism
-  - theory
-  
