@@ -209,7 +209,7 @@
   - nouns
   - fascism
   - politics
-  - marxism
+  - Marxism
   - antifascism
   term_lc: communism
 - term: proletariat
@@ -224,7 +224,7 @@
   - nouns
   - groups
   - politics
-  - marxism
+  - Marxism
   - antifascism
   term_lc: proletariat
 - term: anarcho-syndicalism
@@ -238,7 +238,7 @@
   tags:
   - nouns
   - politics
-  - marxism
+  - Marxism
   term_lc: anarcho-syndicalism
 - term: inchoate
   source_preference: dictionary
@@ -294,7 +294,7 @@
   term_lc: athanasia
 - term: ostentiferous
   source_preference: dictionary
-  short_definition:
+  short_definition: That which brings omens, monsters, or strange manifestations.
   part_of_speech: adjective
   etymology:
   source: FreeDictionaryAPI.com
@@ -310,7 +310,7 @@
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perhorresce
   tags:
-  - nouns
+  - noun
   term_lc: perhorresce
 - term: truckle
   source_preference: dictionary
@@ -354,17 +354,3 @@
   tags:
   - adjectives
   term_lc: rebarbative
-- term: dialectical materialism
-  source_preference: wikipedia
-  short_definition: A materialist theory based on the writings of Karl Marx and Friedrich
-    Engels which emphasizes the importance of real-world conditions and the presence
-    of contradictions within and among social relations.
-  part_of_speech: noun
-  etymology:
-  source: Wikipedia.org
-  url: https://en.wikipedia.org/wiki/Dialectical_materialism
-  tags:
-  - nouns
-  - marxism
-  - theory
-  term_lc: dialectical materialism
