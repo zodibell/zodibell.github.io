@@ -1,11 +1,11 @@
-——- 
+---
 layout: post
 title: “Summer Is Ending”
 date: 2026-09-07
 tags:
     - “musings”
-    - “randomness” 
-——- 
+    - “randomness”
+---
 
 It is Labor Day weekend. Despite being in full-on hermitess mode, I can feel the stirrings of the joy of autumn. Every year, I anticipate the end of the hellish weather. I don’t like running around in 95 degree 95% humidity conditions. And even though this September is forecast to be warmer than usual (yay ecocide-induced climate change! 🙃), the longer nights at least mean more comfortable mornings. At any rate, I love Labor Day weekend because it means we are that much closer to cozy season & spooky season. 
 
