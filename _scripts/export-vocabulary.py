@@ -7,45 +7,187 @@ import yaml
 from pathlib import Path
 from dotenv import load_dotenv
 
+
+# ============================================================
+# Load Environment
+# ============================================================
+
 # Load variables from the repository's .env file.
+#
+# This allows the script to use:
+#
+#     NOTION_TOKEN
+#     NOTION_VOCABULARY_DATA_SOURCE_ID
+#     NOTION_VERSION
+#
 load_dotenv()
+
+
+# ============================================================
+# Zodi Bell Vocabulary — Notion Export
+# ============================================================
+#
+# PURPOSE
+# -------
+# This script exports the vocabulary stored in the Notion
+# Vocabulary database back into:
+#
+#     _data/vocabulary.yml
+#
+# Notion is now the source of truth for the vocabulary.
+#
+# The YAML file is a generated file used by the Jekyll site.
+#
+# ============================================================
+#
+# WORKFLOW
+# --------
+#
+#     Notion Vocabulary database
+#             |
+#             v
+#     export-vocabulary.py
+#             |
+#             v
+#     _data/vocabulary.yml
+#             |
+#             v
+#          Jekyll
+#
+# ============================================================
+#
+# IMPORTANT
+# ---------
+# This script does NOT fetch definitions from external
+# dictionary or Wikipedia APIs.
+#
+# All vocabulary data comes from Notion.
+#
+# The old fetch_definitions.py script was responsible for
+# retrieving missing definitions. That is no longer necessary
+# now that Notion contains the vocabulary data.
+#
+# ============================================================
+#
+# ENVIRONMENT VARIABLES
+# ---------------------
+#
+# Your .env file should contain:
+#
+#     NOTION_TOKEN=your_secret_token
+#
+#     NOTION_VOCABULARY_DATA_SOURCE_ID=your_data_source_id
+#
+#     NOTION_VERSION=2026-03-11
+#
+# The token is intentionally never printed by this script.
+#
+# ============================================================
+#
+# EXPECTED NOTION PROPERTIES
+# ---------------------------
+#
+# Term
+#     Title
+#
+# Source Preference
+#     Select
+#
+# Short Definition
+#     Rich text
+#
+# Part of Speech
+#     Select
+#
+# Etymology
+#     Rich text
+#
+# Source
+#     Select
+#
+# URL
+#     URL
+#
+# Tags
+#     Multi-select
+#
+# ============================================================
+#
+# EXPECTED YAML FIELDS
+# --------------------
+#
+# term
+# source_preference
+# short_definition
+# part_of_speech
+# etymology
+# source
+# url
+# tags
+#
+# ============================================================
+
 
 # ============================================================
 # Configuration
 # ============================================================
 
 # The YAML file Jekyll uses.
+#
 # This file is generated from your Notion Vocabulary database.
 DATA_PATH = Path("_data/vocabulary.yml")
 
-# Notion API configuration.
-NOTION_API_URL = "https://api.notion.com/v1/data_sources/{}/query"
 
-# Your Notion API version.
-NOTION_VERSION = os.getenv("NOTION_VERSION", "2026-03-11")
+# Notion API endpoint used to query a data source.
+NOTION_API_URL = (
+    "https://api.notion.com/v1/data_sources/{}/query"
+)
 
-# Environment variables expected:
-#
-#   NOTION_TOKEN
-#   NOTION_VOCABULARY_DATA_SOURCE_ID
-#
-NOTION_TOKEN = os.getenv("NOTION_TOKEN")
+
+# Use the same Notion API version as the import script.
+NOTION_VERSION = os.getenv(
+    "NOTION_VERSION",
+    "2026-03-11"
+)
+
+
+# Notion authentication.
+NOTION_TOKEN = os.getenv(
+    "NOTION_TOKEN"
+)
+
+
+# Vocabulary data source ID.
 NOTION_VOCABULARY_DATA_SOURCE_ID = os.getenv(
     "NOTION_VOCABULARY_DATA_SOURCE_ID"
 )
 
 
 # ============================================================
-# Notion helpers
+# Validate Environment
+# ============================================================
+
+if not NOTION_TOKEN:
+    raise RuntimeError(
+        "NOTION_TOKEN environment variable is not set."
+    )
+
+
+if not NOTION_VOCABULARY_DATA_SOURCE_ID:
+    raise RuntimeError(
+        "NOTION_VOCABULARY_DATA_SOURCE_ID environment "
+        "variable is not set."
+    )
+
+
+# ============================================================
+# Notion Request Helpers
 # ============================================================
 
 def get_notion_headers():
-    """Build the headers required by the Notion API."""
-
-    if not NOTION_TOKEN:
-        raise RuntimeError(
-            "NOTION_TOKEN environment variable is not set."
-        )
+    """
+    Build the headers required by the Notion API.
+    """
 
     return {
         "Authorization": f"Bearer {NOTION_TOKEN}",
@@ -54,143 +196,226 @@ def get_notion_headers():
     }
 
 
+# ============================================================
+# Notion Property Helpers
+# ============================================================
+
 def get_property(properties, name):
     """
     Safely retrieve a Notion property.
 
-    Returns the property object if it exists, otherwise None.
+    Returns the property object if it exists.
+    Returns None if it does not exist.
     """
 
-    prop = properties.get(name)
+    property_data = properties.get(name)
 
-    if prop is None:
-        print(f"⚠️ Notion property not found: {name}")
+    if property_data is None:
+        print(
+            f"⚠️ Notion property not found: {name}"
+        )
 
-    return prop
+    return property_data
 
 
 def get_title(properties, name):
-    """Extract text from a Notion title property."""
+    """
+    Extract text from a Notion title property.
+    """
 
-    prop = get_property(properties, name)
+    property_data = get_property(
+        properties,
+        name
+    )
 
-    if not prop:
-        return ""
+    if not property_data:
+        return None
 
-    title = prop.get("title", [])
+    title = property_data.get(
+        "title",
+        []
+    )
 
     if not title:
-        return ""
+        return None
 
-    return "".join(
+    value = "".join(
         item.get("plain_text", "")
         for item in title
     ).strip()
 
+    return value or None
+
 
 def get_rich_text(properties, name):
-    """Extract text from a Notion rich_text property."""
+    """
+    Extract text from a Notion rich_text property.
 
-    prop = get_property(properties, name)
+    Empty rich-text properties become None so that YAML
+    receives null rather than an empty string.
+    """
 
-    if not prop:
-        return ""
+    property_data = get_property(
+        properties,
+        name
+    )
 
-    rich_text = prop.get("rich_text", [])
+    if not property_data:
+        return None
+
+    rich_text = property_data.get(
+        "rich_text",
+        []
+    )
 
     if not rich_text:
-        return ""
+        return None
 
-    return "".join(
+    value = "".join(
         item.get("plain_text", "")
         for item in rich_text
     ).strip()
 
+    return value or None
+
 
 def get_select(properties, name):
-    """Extract the selected value from a Notion select property."""
+    """
+    Extract the selected value from a Notion select property.
 
-    prop = get_property(properties, name)
+    Empty select properties become None so that YAML
+    receives null rather than an empty string.
+    """
 
-    if not prop:
-        return ""
+    property_data = get_property(
+        properties,
+        name
+    )
 
-    select = prop.get("select")
+    if not property_data:
+        return None
+
+    select = property_data.get(
+        "select"
+    )
 
     if not select:
-        return ""
+        return None
 
-    return select.get("name", "")
+    value = select.get(
+        "name"
+    )
+
+    if not value:
+        return None
+
+    return value.strip() or None
 
 
 def get_multi_select(properties, name):
-    """Extract all selected values from a Notion multi-select property."""
+    """
+    Extract all selected values from a Notion multi-select
+    property.
 
-    prop = get_property(properties, name)
+    An empty multi-select property becomes an empty list.
+    """
 
-    if not prop:
+    property_data = get_property(
+        properties,
+        name
+    )
+
+    if not property_data:
         return []
 
-    values = prop.get("multi_select", [])
+    values = property_data.get(
+        "multi_select",
+        []
+    )
 
     return [
-        item.get("name", "")
+        item.get("name", "").strip()
         for item in values
-        if item.get("name")
+        if item.get("name", "").strip()
     ]
 
 
 def get_url(properties, name):
-    """Extract a URL property from Notion."""
+    """
+    Extract a URL from a Notion URL property.
 
-    prop = get_property(properties, name)
+    Empty URL properties become None so that YAML receives
+    null rather than an empty string.
+    """
 
-    if not prop:
-        return ""
+    property_data = get_property(
+        properties,
+        name
+    )
 
-    return prop.get("url") or ""
+    if not property_data:
+        return None
+
+    value = property_data.get(
+        "url"
+    )
+
+    if not value:
+        return None
+
+    return value.strip() or None
 
 
 # ============================================================
-# Fetch vocabulary from Notion
+# Fetch Vocabulary from Notion
 # ============================================================
 
 def fetch_notion_vocabulary():
     """
-    Fetch all vocabulary records from the Notion database.
+    Fetch all vocabulary records from the Notion data source.
 
-    Notion returns database results in pages, so this function
-    continues requesting records until there are no more pages.
+    Notion returns results in pages, so this function continues
+    requesting records until there are no more pages.
     """
 
-    if not NOTION_VOCABULARY_DATA_SOURCE_ID:
-        raise RuntimeError(
-            "NOTION_VOCABULARY_DATA_SOURCE_ID environment variable "
-            "is not set."
-        )
+    url = NOTION_API_URL.format(
+        NOTION_VOCABULARY_DATA_SOURCE_ID
+    )
 
-    url = NOTION_API_URL.format(NOTION_VOCABULARY_DATA_SOURCE_ID)
     headers = get_notion_headers()
 
     records = []
+
     start_cursor = None
+
     page_number = 1
 
-    print("🔍 Fetching vocabulary from Notion...")
+    print(
+        "🔍 Fetching vocabulary from Notion..."
+    )
+
     print(
         f"   Data source: "
         f"{NOTION_VOCABULARY_DATA_SOURCE_ID}"
     )
-    print(f"   Notion API version: {NOTION_VERSION}")
+
+    print(
+        f"   Notion API version: {NOTION_VERSION}"
+    )
+
     print()
 
     while True:
         payload = {}
 
         if start_cursor:
-            payload["start_cursor"] = start_cursor
+            payload[
+                "start_cursor"
+            ] = start_cursor
 
-        print(f"📄 Fetching Notion page {page_number}...")
+        print(
+            f"📄 Fetching Notion page {page_number}..."
+        )
 
         try:
             response = requests.post(
@@ -198,9 +423,11 @@ def fetch_notion_vocabulary():
                 headers=headers,
                 json=payload,
             )
+
         except requests.RequestException as e:
-            print(f"⚠️ Notion request failed: {e}")
-            break
+            raise RuntimeError(
+                f"Notion request failed: {e}"
+            ) from e
 
         # Debugging information.
         print(
@@ -210,44 +437,61 @@ def fetch_notion_vocabulary():
 
         if response.status_code != 200:
             print(
-                f"⚠️ Notion API error "
-                f"({response.status_code}):"
+                "⚠️ Notion API error:"
             )
-            print(response.text[:1000])
-            break
+
+            print(
+                response.text[:1000]
+            )
+
+            raise RuntimeError(
+                "Notion API request failed."
+            )
 
         try:
             data = response.json()
+
         except ValueError as e:
-            print(
-                f"⚠️ Could not parse Notion response as JSON: {e}"
-            )
-            break
+            raise RuntimeError(
+                f"Could not parse Notion response as JSON: {e}"
+            ) from e
 
-        page_results = data.get("results", [])
-
-        print(
-            f"   Records returned: {len(page_results)}"
+        page_results = data.get(
+            "results",
+            []
         )
 
-        records.extend(page_results)
+        print(
+            f"   Records returned: "
+            f"{len(page_results)}"
+        )
+
+        records.extend(
+            page_results
+        )
 
         # Notion tells us whether another page exists.
-        if not data.get("has_more"):
+        if not data.get(
+            "has_more"
+        ):
             break
 
-        start_cursor = data.get("next_cursor")
+        start_cursor = data.get(
+            "next_cursor"
+        )
 
         if not start_cursor:
             print(
                 "⚠️ Notion reported more records, "
                 "but did not provide a next cursor."
             )
+
             break
 
         page_number += 1
 
     print()
+
     print(
         f"✅ Retrieved {len(records)} vocabulary records "
         f"from Notion."
@@ -257,81 +501,156 @@ def fetch_notion_vocabulary():
 
 
 # ============================================================
-# Convert Notion records to YAML records
+# Convert Notion Record to YAML Record
 # ============================================================
 
 def notion_record_to_yaml(record):
     """
-    Convert one Notion vocabulary record into the YAML structure
-    expected by the Jekyll vocabulary page.
+    Convert one Notion vocabulary record into the YAML
+    structure expected by the Jekyll vocabulary page.
+
+    The field names intentionally match the existing
+    vocabulary.yml structure.
     """
 
-    properties = record.get("properties", {})
+    properties = record.get(
+        "properties",
+        {}
+    )
+
 
     # --------------------------------------------------------
-    # Required/basic vocabulary fields
+    # Term
     # --------------------------------------------------------
 
-    term = get_title(properties, "Term")
+    term = get_title(
+        properties,
+        "Term"
+    )
+
+
+    # --------------------------------------------------------
+    # Source Preference
+    # --------------------------------------------------------
 
     source_preference = get_select(
         properties,
         "Source Preference"
     )
 
+
+    # --------------------------------------------------------
+    # Short Definition
+    # --------------------------------------------------------
+
     short_definition = get_rich_text(
         properties,
         "Short Definition"
     )
+
+
+    # --------------------------------------------------------
+    # Part of Speech
+    # --------------------------------------------------------
 
     part_of_speech = get_select(
         properties,
         "Part of Speech"
     )
 
+
+    # --------------------------------------------------------
+    # Etymology
+    # --------------------------------------------------------
+
     etymology = get_rich_text(
         properties,
         "Etymology"
     )
 
-    source = get_rich_text(
+
+    # --------------------------------------------------------
+    # Source
+    # --------------------------------------------------------
+    #
+    # IMPORTANT:
+    #
+    # "Source" is a Notion SELECT property, not rich text.
+    #
+    # This matches the schema in import-vocabulary.mjs.
+    # --------------------------------------------------------
+
+    source = get_select(
         properties,
         "Source"
     )
+
+
+    # --------------------------------------------------------
+    # URL
+    # --------------------------------------------------------
 
     url = get_url(
         properties,
         "URL"
     )
 
+
+    # --------------------------------------------------------
+    # Tags
+    # --------------------------------------------------------
+
     tags = get_multi_select(
         properties,
         "Tags"
     )
 
+
     # --------------------------------------------------------
-    # Debugging information
+    # Validate Term
     # --------------------------------------------------------
 
     if not term:
         print(
-            "⚠️ Found a Notion record without a Term. "
-            f"Record ID: {record.get('id')}"
+            "⚠️ Found a Notion record without a Term."
         )
+
+        print(
+            f"   Record ID: {record.get('id')}"
+        )
+
         return None
 
-    print(f"✓ Processing: {term}")
 
     # --------------------------------------------------------
-    # Build the YAML record.
+    # Debugging Information
+    # --------------------------------------------------------
+
+    print(
+        f"✓ Processing: {term}"
+    )
+
+
+    # --------------------------------------------------------
+    # Build YAML Record
+    # --------------------------------------------------------
     #
-    # Keep these field names synchronized with the existing
-    # vocabulary.yml structure and your Jekyll templates.
+    # None values are intentional.
+    #
+    # PyYAML will write:
+    #
+    #     null
+    #
+    # rather than:
+    #
+    #     ''
+    #
+    # This preserves the existing YAML data model.
     # --------------------------------------------------------
 
     entry = {
         "term": term,
-        "source_preference": source_preference or "dictionary",
+        "source_preference": source_preference,
         "short_definition": short_definition,
         "part_of_speech": part_of_speech,
         "etymology": etymology,
@@ -344,146 +663,307 @@ def notion_record_to_yaml(record):
 
 
 # ============================================================
+# Validate Exported Records
+# ============================================================
+
+def validate_vocabulary(vocabulary):
+    """
+    Validate the records before replacing vocabulary.yml.
+
+    This prevents an incomplete or malformed Notion response
+    from accidentally replacing the working YAML file.
+    """
+
+    if not vocabulary:
+        raise RuntimeError(
+            "No valid vocabulary records were created."
+        )
+
+
+    # --------------------------------------------------------
+    # Check for duplicate terms.
+    # --------------------------------------------------------
+
+    seen_terms = set()
+
+    for index, entry in enumerate(
+        vocabulary,
+        start=1
+    ):
+        term = entry.get(
+            "term"
+        )
+
+        if not term:
+            raise RuntimeError(
+                f"Vocabulary record #{index} "
+                "does not have a term."
+            )
+
+        normalized = term.lower()
+
+        if normalized in seen_terms:
+            raise RuntimeError(
+                f'Duplicate vocabulary term found: "{term}"'
+            )
+
+        seen_terms.add(
+            normalized
+        )
+
+
+# ============================================================
+# YAML Dumper
+# ============================================================
+
+class VocabularyDumper(yaml.SafeDumper):
+    """
+    Custom YAML dumper used to keep the generated file close
+    to the formatting of the existing vocabulary.yml.
+
+    In particular:
+    
+    - Lists are indented beneath their property.
+    - Long definitions are not unnecessarily wrapped.
+    - Unicode characters are preserved.
+    """
+    pass
+
+
+def increase_list_indent(
+    dumper,
+    flow,
+    indentless
+):
+    """
+    Force nested YAML lists to be indented beneath their
+    property name.
+
+    This produces:
+
+        tags:
+          - nouns
+          - politics
+
+    instead of:
+
+        tags:
+        - nouns
+        - politics
+    """
+
+    return yaml.SafeDumper.increase_indent(
+        dumper,
+        flow,
+        False
+    )
+
+
+VocabularyDumper.increase_indent = (
+    increase_list_indent
+)
+
+
+# ============================================================
 # Write YAML
 # ============================================================
 
 def write_vocabulary_yaml(vocabulary):
     """
-    Write the vocabulary records to _data/vocabulary.yml.
+    Write the exported vocabulary to _data/vocabulary.yml.
 
-    Notion is the source of truth; this YAML file is generated
-    for Jekyll.
+    The file is only replaced after all records have been
+    successfully fetched, converted, and validated.
     """
 
     print()
-    print(f"💾 Writing vocabulary to {DATA_PATH}...")
+
+    print(
+        f"💾 Writing vocabulary to {DATA_PATH}..."
+    )
 
     try:
-        with open(DATA_PATH, "w", encoding="utf-8") as f:
+        with open(
+            DATA_PATH,
+            "w",
+            encoding="utf-8"
+        ) as f:
+
             yaml.dump(
                 vocabulary,
                 f,
+                Dumper=VocabularyDumper,
                 sort_keys=False,
                 allow_unicode=True,
                 default_flow_style=False,
+                width=1000,
+                indent=2,
             )
+
     except OSError as e:
-        print(
-            f"⚠️ Could not write {DATA_PATH}: {e}"
-        )
-        return False
+        raise RuntimeError(
+            f"Could not write {DATA_PATH}: {e}"
+        ) from e
 
     print(
-        f"✅ Vocabulary file updated successfully."
-    )
-    print(
-        f"   Records written: {len(vocabulary)}"
+        "✅ Vocabulary file updated successfully."
     )
 
-    return True
+    print(
+        f"   Records written: "
+        f"{len(vocabulary)}"
+    )
 
 
 # ============================================================
-# Main update process
+# Main Update Process
 # ============================================================
 
 def update_vocabulary():
     """
-    Fetch vocabulary from Notion and regenerate the Jekyll YAML
-    data file.
+    Fetch vocabulary from Notion and regenerate the Jekyll
+    YAML data file.
     """
 
-    print("================================")
-    print(" Zodi Bell Vocabulary Export")
-    print("================================")
+    print(
+        "================================"
+    )
+
+    print(
+        " Zodi Bell Vocabulary Export"
+    )
+
+    print(
+        "================================"
+    )
+
     print()
 
+
     # --------------------------------------------------------
-    # Fetch records from Notion
+    # Fetch records from Notion.
     # --------------------------------------------------------
 
     records = fetch_notion_vocabulary()
 
+
+    # --------------------------------------------------------
+    # Safety check.
+    #
+    # Never replace the YAML file with an empty export.
+    # --------------------------------------------------------
+
     if not records:
-        print()
         print(
-            "⚠️ No vocabulary records were retrieved from Notion."
+            "⚠️ No vocabulary records were retrieved "
+            "from Notion."
         )
+
         print(
             "   The YAML file was NOT changed."
         )
+
         return
 
+
     # --------------------------------------------------------
-    # Convert Notion records to YAML
+    # Convert Notion records to YAML records.
     # --------------------------------------------------------
 
     vocabulary = []
 
-    print()
-    print("🔄 Converting Notion records to YAML...")
+    print(
+        "🔄 Converting Notion records to YAML..."
+    )
+
     print()
 
     for record in records:
-        entry = notion_record_to_yaml(record)
+        entry = notion_record_to_yaml(
+            record
+        )
 
         if entry:
-            vocabulary.append(entry)
+            vocabulary.append(
+                entry
+            )
+
 
     # --------------------------------------------------------
-    # Make sure we didn't unexpectedly lose records.
+    # Make sure every Notion record converted successfully.
     #
-    # This is a safety check so a temporary Notion/API problem
-    # doesn't accidentally replace your YAML file with a
-    # partially populated file.
+    # This is an important safety check. If Notion returns
+    # records that our exporter cannot understand, we do NOT
+    # want to overwrite the working YAML file.
     # --------------------------------------------------------
-
-    if not vocabulary:
-        print()
-        print(
-            "⚠️ No valid vocabulary records were created."
-        )
-        print(
-            "   The YAML file was NOT changed."
-        )
-        return
 
     if len(vocabulary) != len(records):
         print()
+
         print(
-            f"⚠️ Warning: Notion returned {len(records)} records, "
-            f"but only {len(vocabulary)} could be converted."
+            f"⚠️ Warning: Notion returned "
+            f"{len(records)} records, but only "
+            f"{len(vocabulary)} could be converted."
         )
+
         print(
             "   The YAML file was NOT changed."
         )
+
         return
+
+
+    # --------------------------------------------------------
+    # Validate the converted vocabulary.
+    # --------------------------------------------------------
+
+    validate_vocabulary(
+        vocabulary
+    )
+
 
     # --------------------------------------------------------
     # Sort alphabetically by term.
     #
-    # This keeps the generated YAML predictable and makes Git
-    # diffs much easier to read.
+    # This keeps the generated YAML predictable and makes
+    # Git diffs easier to read.
     # --------------------------------------------------------
 
     vocabulary.sort(
         key=lambda entry: entry["term"].lower()
     )
 
+
     # --------------------------------------------------------
-    # Write the YAML file
+    # Write the YAML file.
     # --------------------------------------------------------
 
-    write_vocabulary_yaml(vocabulary)
+    write_vocabulary_yaml(
+        vocabulary
+    )
+
+
+    # --------------------------------------------------------
+    # Final summary.
+    # --------------------------------------------------------
 
     print()
-    print("================================")
-    print(" Export complete!")
-    print("================================")
+
+    print(
+        "================================"
+    )
+
+    print(
+        " Export complete!"
+    )
+
+    print(
+        "================================"
+    )
 
 
 # ============================================================
-# Run the script
+# Run the Script
 # ============================================================
 
 if __name__ == "__main__":
