@@ -1,118 +1,61 @@
 import "dotenv/config";
+import fs from "node:fs";
 
 /*
- * Vocabulary Enrichment — Notion → External Sources → Notion
+ * Zodi Bell — Vocabulary Enrichment
  *
- * Purpose:
- *   Enrich incomplete vocabulary records in the Notion
- *   Vocabulary database using:
+ * This script enriches vocabulary records stored in Notion.
  *
- *     - FreeDictionaryAPI.com
- *     - Wikipedia.org
+ * MODES
+ * -----
+ *
+ * Preview:
+ *   node _scripts/enrich-vocabulary.mjs --preview
+ *
+ * Write:
+ *   node _scripts/enrich-vocabulary.mjs
+ *
+ * Preview mode is completely read-only.
+ *
+ * Write mode updates ONLY fields that are currently empty in Notion.
+ *
+ * The following fields are NEVER changed by this script:
+ *   - Term
+ *   - Source Preference
+ *   - Tags
+ *
+ * The following fields may be filled when empty:
+ *   - Short Definition
+ *   - Part of Speech
+ *   - Etymology
+ *   - Source
+ *   - URL
+ *
+ * SOURCE PREFERENCE
+ * -----------------
+ *
+ * Source Preference = "dictionary"
+ *   1. FreeDictionaryAPI.com
+ *   2. Wikipedia
+ *   3. Wiktionary (for missing etymology)
+ *
+ * Source Preference = "wikipedia"
+ *   1. Wikipedia
+ *   2. FreeDictionaryAPI.com
+ *   3. Wiktionary (for missing etymology)
+ *
+ * IMPORTANT
+ * ---------
  *
  * Notion remains the source of truth.
  *
+ * This script does NOT export YAML.
+ * Use export-vocabulary.mjs after enrichment to update:
  *
- * WORKFLOW
- * ============================================================
- *
- *   Notion
- *      ↓
- *   enrich-vocabulary.mjs
- *      ↓
- *   Fill missing fields only
- *      ↓
- *   Notion
- *      ↓
- *   export-vocabulary.mjs
- *      ↓
  *   _data/vocabulary_normalized.yml
- *      ↓
- *   Jekyll
- *
- *
- * MODES
- * ============================================================
- *
- * Preview:
- *
- *   node _scripts/enrich-vocabulary.mjs --preview
- *
- * Preview mode:
- *   - Reads vocabulary records from Notion
- *   - Looks up incomplete records
- *   - Shows proposed changes
- *   - Does NOT modify Notion
- *
- *
- * Write:
- *
- *   node _scripts/enrich-vocabulary.mjs
- *
- * Write mode:
- *   - Performs the same lookups
- *   - Updates only empty fields in Notion
- *   - Never overwrites existing values
- *
- *
- * IMPORTANT
- * ============================================================
- *
- * This script NEVER changes:
- *
- *   Term
- *   Source Preference
- *   Tags
- *
- * This script may populate these fields when they are empty:
- *
- *   Short Definition
- *   Part of Speech
- *   Etymology
- *   Source
- *   URL
- *
- *
- * FIELD-BY-FIELD ENRICHMENT
- * ============================================================
- *
- * Sources are treated as providers of individual fields.
- *
- * For example:
- *
- *   FreeDictionaryAPI
- *      → definition ✓
- *      → part of speech ✓
- *      → etymology —
- *
- *   Wikipedia
- *      → definition ✓
- *      → part of speech —
- *      → etymology —
- *
- * If a field is already populated in Notion, it is NEVER
- * overwritten.
- *
- * If the preferred source does not provide a particular field,
- * another source may be consulted for that field.
- *
- *
- * SOURCE PREFERENCE
- * ============================================================
- *
- * Source Preference controls which source is tried first.
- *
- *   dictionary
- *      → FreeDictionaryAPI.com
- *      → Wikipedia fallback
- *
- *   wikipedia
- *      → Wikipedia
- *      → FreeDictionaryAPI.com fallback
- *
  *
  * ENVIRONMENT VARIABLES
- * ============================================================
+ * ---------------------
  *
  * Required:
  *
@@ -123,514 +66,155 @@ import "dotenv/config";
  *
  *   NOTION_VERSION
  *
+ * If NOTION_VERSION is not provided, the script uses:
+ *
+ *   2026-03-11
+ *
+ * API SOURCES
+ * -----------
+ *
+ * FreeDictionaryAPI:
+ *   https://freedictionaryapi.com/
+ *
+ * Wikipedia:
+ *   https://en.wikipedia.org/api/rest_v1/
+ *
+ * Wiktionary:
+ *   https://en.wiktionary.org/w/api.php
+ *
+ * Wiktionary is used specifically to retrieve etymology because
+ * FreeDictionaryAPI does not provide etymology in the response data
+ * used by this script.
  */
 
+// ============================================================
+// Configuration
+// ============================================================
 
-/* ============================================================
- * Configuration
- * ============================================================
- */
+const PREVIEW_MODE = process.argv.includes("--preview");
 
-const NOTION_TOKEN =
-  process.env.NOTION_TOKEN;
-
-const DATA_SOURCE_ID =
-  process.env.NOTION_VOCABULARY_DATA_SOURCE_ID;
+const NOTION_TOKEN = process.env.NOTION_TOKEN;
+const DATA_SOURCE_ID = process.env.NOTION_VOCABULARY_DATA_SOURCE_ID;
 
 const NOTION_VERSION =
   process.env.NOTION_VERSION || "2026-03-11";
 
-
-/*
- * FreeDictionaryAPI endpoint.
- */
 const FREE_DICTIONARY_URL =
   "https://freedictionaryapi.com/api/v1/entries/en";
 
-
-/*
- * Wikipedia REST API endpoint.
- */
 const WIKIPEDIA_URL =
   "https://en.wikipedia.org/api/rest_v1/page/summary";
 
+const WIKTIONARY_API_URL =
+  "https://en.wiktionary.org/w/api.php";
 
-/*
- * User-Agent used when contacting Wikipedia.
- */
+const WIKTIONARY_PAGE_URL =
+  "https://en.wiktionary.org/wiki";
+
 const USER_AGENT =
   "ZodiBellVocabularyEnrichment/1.0 (https://zodibell.github.io/)";
 
-
 /*
- * Delay between external API requests.
+ * Keep requests reasonably gentle on external APIs.
  *
- * This keeps requests polite and reduces the chance of
- * triggering rate limits.
+ * Wiktionary and Wikipedia are Wikimedia services, so we use a
+ * slightly longer delay between requests than we might for a
+ * local API.
  */
-const REQUEST_DELAY =
-  500;
+const REQUEST_DELAY = 500;
 
+// ============================================================
+// Expected Notion schema
+// ============================================================
 
-/*
- * Preview mode is enabled when the command includes:
- *
- *   --preview
- */
-const PREVIEW =
-  process.argv.includes("--preview");
-
-
-/*
- * Expected Notion database schema.
- */
-const REQUIRED_PROPERTIES = {
-  "Term": "title",
+const EXPECTED_SCHEMA = {
+  Term: "title",
   "Source Preference": "select",
   "Short Definition": "rich_text",
   "Part of Speech": "select",
-  "Etymology": "rich_text",
-  "Source": "select",
-  "URL": "url",
-  "Tags": "multi_select",
+  Etymology: "rich_text",
+  Source: "select",
+  URL: "url",
+  Tags: "multi_select",
 };
 
+// ============================================================
+// Utility helpers
+// ============================================================
 
-/* ============================================================
- * General Helpers
- * ============================================================
- */
-
-
-/*
- * Stop the script with a clear error message.
- */
-function fail(message) {
-  console.error(`\nERROR: ${message}`);
-  process.exit(1);
-}
-
-
-/*
- * Pause between requests.
- */
-function sleep(milliseconds) {
-  return new Promise((resolve) =>
-    setTimeout(resolve, milliseconds)
-  );
-}
-
-
-/*
- * Determine whether a value is empty.
- *
- * Empty strings, null, undefined, and empty arrays are
- * considered empty.
- */
 function isEmpty(value) {
-  if (
-    value === null ||
-    value === undefined
-  ) {
-    return true;
-  }
-
-
-  if (
-    typeof value === "string"
-  ) {
-    return value.trim() === "";
-  }
-
-
-  if (
-    Array.isArray(value)
-  ) {
-    return value.length === 0;
-  }
-
-
-  return false;
-}
-
-
-/* ============================================================
- * Notion API Helpers
- * ============================================================
- */
-
-
-/*
- * Headers used for Notion API requests.
- */
-function notionHeaders() {
-  return {
-    Authorization: `Bearer ${NOTION_TOKEN}`,
-    "Notion-Version": NOTION_VERSION,
-    "Content-Type": "application/json",
-  };
-}
-
-
-/*
- * Make a request to the Notion API.
- */
-async function notionRequest(
-  url,
-  options = {}
-) {
-  const response =
-    await fetch(url, {
-      ...options,
-
-      headers: {
-        ...notionHeaders(),
-        ...(options.headers || {}),
-      },
-    });
-
-
-  const text =
-    await response.text();
-
-
-  let data;
-
-
-  try {
-    data =
-      text
-        ? JSON.parse(text)
-        : {};
-  } catch {
-    throw new Error(
-      `Notion returned invalid JSON (HTTP ${response.status}).`
-    );
-  }
-
-
-  if (!response.ok) {
-    const message =
-      data?.message ||
-      data?.error ||
-      `HTTP ${response.status}`;
-
-
-    throw new Error(
-      `Notion API error: ${message}`
-    );
-  }
-
-
-  return data;
-}
-
-
-/* ============================================================
- * External API Helpers
- * ============================================================
- */
-
-
-/*
- * Make a request to an external JSON API.
- *
- * A 404 means that the source does not have the requested
- * entry, so null is returned.
- */
-async function externalRequest(
-  url,
-  options = {}
-) {
-  const response =
-    await fetch(url, {
-      ...options,
-
-      headers: {
-        "User-Agent": USER_AGENT,
-        Accept: "application/json",
-        ...(options.headers || {}),
-      },
-    });
-
-
-  if (
-    response.status === 404
-  ) {
-    return null;
-  }
-
-
-  const text =
-    await response.text();
-
-
-  let data;
-
-
-  try {
-    data =
-      text
-        ? JSON.parse(text)
-        : {};
-  } catch {
-    throw new Error(
-      `External API returned invalid JSON (HTTP ${response.status}).`
-    );
-  }
-
-
-  if (!response.ok) {
-    const message =
-      data?.message ||
-      data?.error ||
-      `HTTP ${response.status}`;
-
-
-    throw new Error(
-      `External API error: ${message}`
-    );
-  }
-
-
-  return data;
-}
-
-
-/* ============================================================
- * Notion Property Helpers
- * ============================================================
- */
-
-
-/*
- * Return plain text from a Notion rich_text property.
- */
-function getRichText(property) {
-  const value =
-    property?.rich_text
-      ?.map((item) => item.plain_text)
-      .join("");
-
-
-  return value || null;
-}
-
-
-/*
- * Return the selected value from a Notion select property.
- */
-function getSelect(property) {
-  return property?.select?.name ?? null;
-}
-
-
-/*
- * Return the URL from a Notion URL property.
- */
-function getUrl(property) {
-  return property?.url || null;
-}
-
-
-/*
- * Return title text from a Notion title property.
- */
-function getTitle(property) {
-  const value =
-    property?.title
-      ?.map((item) => item.plain_text)
-      .join("");
-
-
-  return value || null;
-}
-
-
-/*
- * Return the names from a Notion multi-select property.
- */
-function getMultiSelect(property) {
   return (
-    property?.multi_select
-      ?.map((item) => item.name)
-      .filter(Boolean) || []
+    value === null ||
+    value === undefined ||
+    value === ""
   );
 }
 
-
-/* ============================================================
- * Notion Update Property Helpers
- * ============================================================
- */
-
-
-/*
- * Convert a string to a Notion rich_text property.
- */
-function richTextProperty(value) {
-  return {
-    rich_text: [
-      {
-        type: "text",
-
-        text: {
-          content: value,
-        },
-      },
-    ],
-  };
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-
-/*
- * Convert a string to a Notion select property.
- */
-function selectProperty(value) {
-  return {
-    select: {
-      name: value,
-    },
-  };
+function normalizeTerm(term) {
+  return String(term || "")
+    .trim()
+    .toLowerCase();
 }
 
+function formatSourceName(source) {
+  if (source === "dictionary") {
+    return "FreeDictionaryAPI.com";
+  }
 
-/*
- * Convert a string to a Notion URL property.
- */
-function urlProperty(value) {
-  return {
-    url: value,
-  };
+  if (source === "wikipedia") {
+    return "Wikipedia.org";
+  }
+
+  if (source === "wiktionary") {
+    return "Wiktionary.org";
+  }
+
+  return source;
 }
 
-
-/* ============================================================
- * Convert Notion Page → Vocabulary Record
- * ============================================================
- */
-
-
 /*
- * Convert one Notion page into the structure used by the
- * enrichment process.
- */
-function pageToVocabularyRecord(page) {
-  const properties =
-    page.properties;
-
-
-  return {
-    id: page.id,
-
-    term:
-      getTitle(
-        properties["Term"]
-      ),
-
-    source_preference:
-      getSelect(
-        properties["Source Preference"]
-      ),
-
-    short_definition:
-      getRichText(
-        properties["Short Definition"]
-      ),
-
-    part_of_speech:
-      getSelect(
-        properties["Part of Speech"]
-      ),
-
-    etymology:
-      getRichText(
-        properties["Etymology"]
-      ),
-
-    source:
-      getSelect(
-        properties["Source"]
-      ),
-
-    url:
-      getUrl(
-        properties["URL"]
-      ),
-
-    tags:
-      getMultiSelect(
-        properties["Tags"]
-      ),
-  };
-}
-
-
-/* ============================================================
- * FreeDictionaryAPI Helpers
- * ============================================================
- */
-
-
-/*
- * Recursively search an object for a property.
+ * Recursively search an API response for one of several possible
+ * property names.
  *
- * This makes the parser more tolerant of changes in the
- * API's response structure.
+ * This makes the dictionary parser more tolerant of changes in
+ * the API's nested response structure.
  */
-function findFirstValue(
-  value,
-  propertyNames
-) {
-  if (
-    value === null ||
-    value === undefined
-  ) {
+function findFirstValue(value, propertyNames) {
+  if (value === null || value === undefined) {
     return null;
   }
 
-
-  if (
-    Array.isArray(value)
-  ) {
+  if (Array.isArray(value)) {
     for (const item of value) {
-      const result =
-        findFirstValue(
-          item,
-          propertyNames
-        );
-
+      const result = findFirstValue(
+        item,
+        propertyNames
+      );
 
       if (!isEmpty(result)) {
         return result;
       }
     }
 
-
     return null;
   }
 
-
-  if (
-    typeof value !== "object"
-  ) {
+  if (typeof value !== "object") {
     return null;
   }
 
-
-  for (
-    const propertyName
-    of propertyNames
-  ) {
+  for (const propertyName of propertyNames) {
     if (
       Object.prototype.hasOwnProperty.call(
         value,
         propertyName
       )
     ) {
-      const candidate =
-        value[propertyName];
-
+      const candidate = value[propertyName];
 
       if (
         typeof candidate === "string" &&
@@ -641,32 +225,173 @@ function findFirstValue(
     }
   }
 
-
-  for (
-    const child
-    of Object.values(value)
-  ) {
-    const result =
-      findFirstValue(
-        child,
-        propertyNames
-      );
-
+  for (const child of Object.values(value)) {
+    const result = findFirstValue(
+      child,
+      propertyNames
+    );
 
     if (!isEmpty(result)) {
       return result;
     }
   }
 
-
   return null;
 }
 
+/*
+ * Convert a Notion rich_text property into plain text.
+ */
+function getRichTextValue(property) {
+  if (
+    !property ||
+    property.type !== "rich_text" ||
+    !Array.isArray(property.rich_text)
+  ) {
+    return "";
+  }
+
+  return property.rich_text
+    .map((item) => item.plain_text || "")
+    .join("")
+    .trim();
+}
 
 /*
- * Extract the first useful definition from a
- * FreeDictionaryAPI response.
+ * Convert a Notion title property into plain text.
  */
+function getTitleValue(property) {
+  if (
+    !property ||
+    property.type !== "title" ||
+    !Array.isArray(property.title)
+  ) {
+    return "";
+  }
+
+  return property.title
+    .map((item) => item.plain_text || "")
+    .join("")
+    .trim();
+}
+
+/*
+ * Convert a Notion select property into its selected name.
+ */
+function getSelectValue(property) {
+  if (
+    !property ||
+    property.type !== "select" ||
+    !property.select
+  ) {
+    return "";
+  }
+
+  return property.select.name || "";
+}
+
+/*
+ * Convert a Notion URL property into its URL.
+ */
+function getUrlValue(property) {
+  if (
+    !property ||
+    property.type !== "url"
+  ) {
+    return "";
+  }
+
+  return property.url || "";
+}
+
+/*
+ * Convert a Notion multi-select property into an array of
+ * names.
+ */
+function getMultiSelectValues(property) {
+  if (
+    !property ||
+    property.type !== "multi_select" ||
+    !Array.isArray(property.multi_select)
+  ) {
+    return [];
+  }
+
+  return property.multi_select
+    .map((item) => item.name)
+    .filter(Boolean);
+}
+
+// ============================================================
+// HTTP helper
+// ============================================================
+
+async function fetchJson(
+  url,
+  options = {},
+  label = "API request"
+) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      Accept: "application/json",
+      "User-Agent": USER_AGENT,
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `${label} failed: HTTP ${response.status} ${response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
+// ============================================================
+// FreeDictionaryAPI
+// ============================================================
+
+/*
+ * FreeDictionaryAPI is used for dictionary-style information:
+ *
+ *   - definition
+ *   - part of speech
+ *   - URL, when available
+ *
+ * It is NOT relied upon for etymology.
+ */
+async function lookupDictionary(term) {
+  const url =
+    `${FREE_DICTIONARY_URL}/` +
+    encodeURIComponent(term);
+
+  const data = await fetchJson(
+    url,
+    {},
+    `FreeDictionaryAPI lookup for "${term}"`
+  );
+
+  const definition =
+    extractDictionaryDefinition(data);
+
+  const partOfSpeech =
+    extractDictionaryPartOfSpeech(data);
+
+  const sourceUrl =
+    extractDictionaryUrl(data);
+
+  return {
+    source: "dictionary",
+    sourceName: "FreeDictionaryAPI.com",
+    definition,
+    partOfSpeech,
+    etymology: null,
+    url: sourceUrl,
+  };
+}
+
 function extractDictionaryDefinition(data) {
   return findFirstValue(
     data,
@@ -677,11 +402,6 @@ function extractDictionaryDefinition(data) {
   );
 }
 
-
-/*
- * Extract the first part of speech from a
- * FreeDictionaryAPI response.
- */
 function extractDictionaryPartOfSpeech(data) {
   return findFirstValue(
     data,
@@ -693,561 +413,460 @@ function extractDictionaryPartOfSpeech(data) {
   );
 }
 
-
-/*
- * Extract the first etymology from a
- * FreeDictionaryAPI response.
- *
- * The API may expose this under several possible names,
- * depending on the response structure/version.
- */
-function extractDictionaryEtymology(data) {
+function extractDictionaryUrl(data) {
   return findFirstValue(
     data,
     [
-      "etymology",
-      "origin",
-      "etymon",
+      "url",
+      "sourceUrl",
+      "source_url",
     ]
   );
 }
 
+// ============================================================
+// Wikipedia
+// ============================================================
 
 /*
- * Extract a useful URL from a dictionary response.
+ * Wikipedia is used for:
+ *
+ *   - short definition / summary
+ *   - source
+ *   - URL
+ *
+ * Wikipedia is not relied upon for etymology.
  */
-function extractDictionaryUrl(
-  data,
-  fallbackUrl
-) {
-  const apiUrl =
-    findFirstValue(
-      data,
-      [
-        "url",
-        "sourceUrl",
-      ]
-    );
-
-
-  return (
-    apiUrl ||
-    fallbackUrl
-  );
-}
-
-
-/*
- * Fetch a vocabulary entry from FreeDictionaryAPI.com.
- */
-async function lookupFreeDictionary(
-  term
-) {
-  const encodedTerm =
+async function lookupWikipedia(term) {
+  const url =
+    `${WIKIPEDIA_URL}/` +
     encodeURIComponent(term);
 
-
-  const requestUrl =
-    `${FREE_DICTIONARY_URL}/${encodedTerm}`;
-
-
-  const data =
-    await externalRequest(
-      requestUrl
+  try {
+    const data = await fetchJson(
+      url,
+      {
+        headers: {
+          "User-Agent": USER_AGENT,
+        },
+      },
+      `Wikipedia lookup for "${term}"`
     );
 
+    if (
+      !data ||
+      !data.extract ||
+      !data.content_urls ||
+      !data.content_urls.desktop
+    ) {
+      return null;
+    }
 
-  if (!data) {
+    return {
+      source: "wikipedia",
+      sourceName: "Wikipedia.org",
+      definition:
+        String(data.extract).trim() || null,
+      partOfSpeech: null,
+      etymology: null,
+      url:
+        data.content_urls.desktop.page ||
+        null,
+    };
+  } catch (error) {
+    /*
+     * A missing Wikipedia page is normal for many vocabulary
+     * words, so treat a 404/not-found style response as a
+     * normal "no match" rather than a script error.
+     */
+    if (
+      String(error.message).includes("HTTP 404")
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+// ============================================================
+// Wiktionary
+// ============================================================
+
+/*
+ * Wiktionary is used specifically for etymology.
+ *
+ * Wiktionary pages contain human-readable wiki markup rather
+ * than a simple structured etymology field. We therefore use
+ * the MediaWiki API to retrieve the raw page content and
+ * extract the English-language Etymology section.
+ *
+ * This function deliberately does NOT attempt to replace the
+ * dictionary or Wikipedia lookups for definitions.
+ */
+async function lookupWiktionary(term) {
+  const pageTitle = term.trim();
+
+  const params = new URLSearchParams({
+    action: "query",
+    prop: "revisions",
+    rvprop: "content",
+    rvslots: "main",
+    rvlimit: "1",
+    titles: pageTitle,
+    format: "json",
+    formatversion: "2",
+  });
+
+  const url =
+    `${WIKTIONARY_API_URL}?${params.toString()}`;
+
+  let data;
+
+  try {
+    data = await fetchJson(
+      url,
+      {
+        headers: {
+          "User-Agent": USER_AGENT,
+        },
+      },
+      `Wiktionary lookup for "${term}"`
+    );
+  } catch (error) {
+    if (
+      String(error.message).includes("HTTP 404")
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+
+  const page =
+    data?.query?.pages?.[0];
+
+  if (!page || page.missing) {
     return null;
   }
 
+  const wikitext =
+    page.revisions?.[0]?.slots?.main?.content;
 
-  const definition =
-    extractDictionaryDefinition(
-      data
-    );
-
-
-  const partOfSpeech =
-    extractDictionaryPartOfSpeech(
-      data
-    );
-
+  if (
+    typeof wikitext !== "string" ||
+    !wikitext.trim()
+  ) {
+    return null;
+  }
 
   const etymology =
-    extractDictionaryEtymology(
-      data
-    );
+    extractEnglishEtymology(wikitext);
 
-
-  const url =
-    extractDictionaryUrl(
-      data,
-      requestUrl
-    );
-
-
-  /*
-   * If the API returned an object but none of the expected
-   * fields could be extracted, treat it as unusable.
-   */
-  if (
-    !definition &&
-    !partOfSpeech &&
-    !etymology &&
-    !url
-  ) {
-    return null;
-  }
-
-
-  return {
-    short_definition:
-      definition,
-
-    part_of_speech:
-      partOfSpeech,
-
-    etymology:
-      etymology,
-
-    source:
-      "FreeDictionaryAPI.com",
-
-    url,
-  };
-}
-
-
-/* ============================================================
- * Wikipedia Helpers
- * ============================================================
- */
-
-
-/*
- * Fetch a vocabulary entry from Wikipedia.
- *
- * Wikipedia reliably provides:
- *
- *   Short Definition
- *   Source
- *   URL
- *
- * It does not reliably provide structured:
- *
- *   Part of Speech
- *   Etymology
- *
- * Therefore those fields remain null here.
- */
-async function lookupWikipedia(
-  term
-) {
-  const encodedTerm =
-    encodeURIComponent(
-      term.replace(
-        /\s+/g,
-        "_"
-      )
-    );
-
-
-  const requestUrl =
-    `${WIKIPEDIA_URL}/${encodedTerm}`;
-
-
-  const data =
-    await externalRequest(
-      requestUrl
-    );
-
-
-  if (!data) {
-    return null;
-  }
-
-
-  const definition =
-    data.extract ||
-    null;
-
-
-  const url =
-    data?.content_urls?.desktop?.page ||
-    data?.content_urls?.mobile?.page ||
-    null;
-
-
-  if (!definition) {
-    return null;
-  }
-
-
-  return {
-    short_definition:
-      definition,
-
-    part_of_speech:
-      null,
-
-    etymology:
-      null,
-
-    source:
-      "Wikipedia.org",
-
-    url,
-  };
-}
-
-
-/* ============================================================
- * Determine Source Order
- * ============================================================
- */
-
-
-/*
- * Return the sources in the order they should be tried.
- */
-function getSourceOrder(
-  sourcePreference
-) {
-  const preference =
-    String(
-      sourcePreference || "dictionary"
-    )
-      .trim()
-      .toLowerCase();
-
-
-  if (
-    preference === "wikipedia"
-  ) {
-    return [
-      "wikipedia",
-      "dictionary",
-    ];
-  }
-
-
-  /*
-   * Dictionary is the default.
-   */
-  return [
-    "dictionary",
-    "wikipedia",
-  ];
-}
-
-
-/*
- * Run one source lookup.
- */
-async function lookupSource(
-  source,
-  term
-) {
-  if (
-    source === "wikipedia"
-  ) {
-    return lookupWikipedia(term);
-  }
-
-
-  return lookupFreeDictionary(term);
-}
-
-
-/* ============================================================
- * Field-by-Field Enrichment
- * ============================================================
- */
-
-
-/*
- * These are the only fields that this script is allowed
- * to populate.
- */
-const ENRICHABLE_FIELDS = [
-  "short_definition",
-  "part_of_speech",
-  "etymology",
-  "source",
-  "url",
-];
-
-
-/*
- * Determine which fields are missing from a record.
- */
-function getMissingFields(record) {
-  return ENRICHABLE_FIELDS.filter(
-    (field) =>
-      isEmpty(record[field])
-  );
-}
-
-
-/*
- * Enrich one vocabulary record.
- *
- * Each source is allowed to contribute whatever fields it
- * actually provides.
- *
- * We continue to another source whenever useful fields remain
- * missing.
- */
-async function enrichRecord(
-  record
-) {
-  const missingFields =
-    getMissingFields(record);
-
-
-  if (
-    missingFields.length === 0
-  ) {
+  if (!etymology) {
     return {
-      enrichment: {},
-      sourcesUsed: [],
-      missingFields: [],
+      source: "wiktionary",
+      sourceName: "Wiktionary.org",
+      definition: null,
+      partOfSpeech: null,
+      etymology: null,
+      url: buildWiktionaryUrl(term),
     };
   }
 
-
-  const enrichment = {};
-
-  const sourcesUsed = [];
-
-  const sourceOrder =
-    getSourceOrder(
-      record.source_preference
-    );
-
-
-  for (
-    const source
-    of sourceOrder
-  ) {
-    /*
-     * Stop once every field has been supplied.
-     */
-    const stillMissing =
-      ENRICHABLE_FIELDS.filter(
-        (field) =>
-          isEmpty(record[field]) &&
-          isEmpty(enrichment[field])
-      );
-
-
-    if (
-      stillMissing.length === 0
-    ) {
-      break;
-    }
-
-
-    let result;
-
-
-    try {
-      result =
-        await lookupSource(
-          source,
-          record.term
-        );
-    } catch (error) {
-      console.log(
-        `    ${source} lookup failed: ${error.message}`
-      );
-
-      continue;
-    }
-
-
-    if (!result) {
-      console.log(
-        `    ${source}: no usable entry`
-      );
-
-      await sleep(
-        REQUEST_DELAY
-      );
-
-      continue;
-    }
-
-
-    sourcesUsed.push(
-      result.source
-    );
-
-
-    /*
-     * Copy only fields that:
-     *
-     *   1. are missing in Notion
-     *   2. have not already been supplied by another source
-     *   3. actually contain a value
-     */
-    for (
-      const field
-      of ENRICHABLE_FIELDS
-    ) {
-      if (
-        isEmpty(record[field]) &&
-        isEmpty(enrichment[field]) &&
-        !isEmpty(result[field])
-      ) {
-        enrichment[field] =
-          result[field];
-      }
-    }
-
-
-    await sleep(
-      REQUEST_DELAY
-    );
-  }
-
-
-  const remainingFields =
-    ENRICHABLE_FIELDS.filter(
-      (field) =>
-        isEmpty(record[field]) &&
-        isEmpty(enrichment[field])
-    );
-
-
   return {
-    enrichment,
-    sourcesUsed,
-    missingFields:
-      remainingFields,
+    source: "wiktionary",
+    sourceName: "Wiktionary.org",
+    definition: null,
+    partOfSpeech: null,
+    etymology,
+    url: buildWiktionaryUrl(term),
   };
 }
 
-
-/* ============================================================
- * Build Notion Changes
- * ============================================================
- */
-
-
 /*
- * Convert the proposed enrichment into a Notion PATCH object.
+ * Extract the English-language Etymology section.
  *
- * Only fields that were empty in the original record are
- * included.
+ * A typical Wiktionary entry looks approximately like:
+ *
+ *   ==English==
+ *
+ *   ===Etymology===
+ *   ...
+ *
+ *   ===Pronunciation===
+ *   ...
+ *
+ * We only want the text between the Etymology heading and
+ * the next heading at the same level.
+ *
+ * The parser is intentionally conservative. If the page has
+ * an unusual structure, it returns null rather than putting
+ * unrelated content into Notion.
  */
-function buildChanges(
-  record,
-  enrichment
-) {
-  const changes = {};
+function extractEnglishEtymology(wikitext) {
+  const englishSectionMatch =
+    wikitext.match(
+      /^==\s*English\s*==([\s\S]*?)(?=^==[^=].*?==\s*$|\s*$)/im
+    );
 
+  const englishSection =
+    englishSectionMatch
+      ? englishSectionMatch[1]
+      : wikitext;
 
-  if (
-    isEmpty(record.short_definition) &&
-    !isEmpty(
-      enrichment.short_definition
-    )
-  ) {
-    changes["Short Definition"] =
-      richTextProperty(
-        enrichment.short_definition
-      );
+  const etymologyMatch =
+    englishSection.match(
+      /^===\s*Etymology(?:\s*\d+)?\s*===([\s\S]*?)(?=^===.*?===\s*$|^==.*?==\s*$|\s*$)/im
+    );
+
+  if (!etymologyMatch) {
+    return null;
   }
 
+  const cleaned =
+    cleanWiktionaryText(
+      etymologyMatch[1]
+    );
 
-  if (
-    isEmpty(record.part_of_speech) &&
-    !isEmpty(
-      enrichment.part_of_speech
-    )
-  ) {
-    changes["Part of Speech"] =
-      selectProperty(
-        enrichment.part_of_speech
-      );
-  }
-
-
-  if (
-    isEmpty(record.etymology) &&
-    !isEmpty(
-      enrichment.etymology
-    )
-  ) {
-    changes["Etymology"] =
-      richTextProperty(
-        enrichment.etymology
-      );
-  }
-
-
-  if (
-    isEmpty(record.source) &&
-    !isEmpty(
-      enrichment.source
-    )
-  ) {
-    changes["Source"] =
-      selectProperty(
-        enrichment.source
-      );
-  }
-
-
-  if (
-    isEmpty(record.url) &&
-    !isEmpty(
-      enrichment.url
-    )
-  ) {
-    changes["URL"] =
-      urlProperty(
-        enrichment.url
-      );
-  }
-
-
-  return changes;
+  return cleaned || null;
 }
 
-
 /*
- * Return the human-readable names of changed fields.
+ * Turn common Wiktionary markup into readable plain text.
+ *
+ * This is intentionally conservative. We don't need to fully
+ * implement a Wiktionary parser; we only need a clean enough
+ * etymology for the Notion rich_text field.
  */
-function changedPropertyNames(
-  changes
-) {
-  return Object.keys(changes);
+function cleanWiktionaryText(text) {
+  let value = String(text || "");
+
+  // Remove comments.
+  value = value.replace(
+    /<!--[\s\S]*?-->/g,
+    ""
+  );
+
+  // Remove templates such as {{...}}.
+  value = removeBalancedTemplates(value);
+
+  // Convert wiki links:
+  // [[word]]       -> word
+  // [[word|label]] -> label
+  value = value.replace(
+    /\[\[([^\]|]+)\|([^\]]+)\]\]/g,
+    "$2"
+  );
+
+  value = value.replace(
+    /\[\[([^\]]+)\]\]/g,
+    "$1"
+  );
+
+  // Convert external links:
+  // [https://example.com label] -> label
+  value = value.replace(
+    /\[(https?:\/\/\S+)\s+([^\]]+)\]/g,
+    "$2"
+  );
+
+  // Remove bare external links.
+  value = value.replace(
+    /\[(https?:\/\/[^\s\]]+)\]/g,
+    ""
+  );
+
+  // Remove simple HTML tags.
+  value = value.replace(
+    /<\/?[^>]+>/g,
+    ""
+  );
+
+  // Remove emphasis markup.
+  value = value.replace(
+    /'{2,5}/g,
+    ""
+  );
+
+  // Remove list markers.
+  value = value.replace(
+    /^\s*[*#:;]+\s*/gm,
+    ""
+  );
+
+  // Normalize whitespace.
+  value = value.replace(
+    /\r/g,
+    ""
+  );
+
+  value = value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(" ");
+
+  return value
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-
-/* ============================================================
- * Update Notion
- * ============================================================
- */
-
-
 /*
- * Update one Notion vocabulary page.
+ * Remove balanced {{...}} template markup.
  *
- * This function is only called in write mode.
+ * Wiktionary templates can be nested, so a simple regex is not
+ * sufficient. This small parser removes balanced double-curly
+ * template blocks.
  */
+function removeBalancedTemplates(text) {
+  let result = "";
+  let depth = 0;
+
+  for (let i = 0; i < text.length; i += 1) {
+    const current =
+      text[i];
+
+    const next =
+      text[i + 1];
+
+    if (
+      current === "{" &&
+      next === "{"
+    ) {
+      depth += 1;
+      i += 1;
+      continue;
+    }
+
+    if (
+      current === "}" &&
+      next === "}" &&
+      depth > 0
+    ) {
+      depth -= 1;
+      i += 1;
+      continue;
+    }
+
+    if (depth === 0) {
+      result += current;
+    }
+  }
+
+  return result;
+}
+
+function buildWiktionaryUrl(term) {
+  return (
+    `${WIKTIONARY_PAGE_URL}/` +
+    encodeURIComponent(term.trim().replace(/ /g, "_"))
+  );
+}
+
+// ============================================================
+// Notion helpers
+// ============================================================
+
+function notionHeaders() {
+  return {
+    Authorization: `Bearer ${NOTION_TOKEN}`,
+    "Notion-Version": NOTION_VERSION,
+    "Content-Type": "application/json",
+  };
+}
+
+async function notionRequest(
+  path,
+  options = {}
+) {
+  const response = await fetch(
+    `https://api.notion.com${path}`,
+    {
+      ...options,
+      headers: {
+        ...notionHeaders(),
+        ...(options.headers || {}),
+      },
+    }
+  );
+
+  const text =
+    await response.text();
+
+  let data = {};
+
+  try {
+    data =
+      text ? JSON.parse(text) : {};
+  } catch {
+    data = {
+      raw: text,
+    };
+  }
+
+  if (!response.ok) {
+    const message =
+      data?.message ||
+      `${response.status} ${response.statusText}`;
+
+    throw new Error(
+      `Notion API error: ${message}`
+    );
+  }
+
+  return data;
+}
+
+async function getDataSource() {
+  return notionRequest(
+    `/v1/data_sources/${DATA_SOURCE_ID}`
+  );
+}
+
+async function queryDataSource() {
+  const records = [];
+  let startCursor = undefined;
+
+  do {
+    const body = {
+      page_size: 100,
+    };
+
+    if (startCursor) {
+      body.start_cursor = startCursor;
+    }
+
+    const response =
+      await notionRequest(
+        `/v1/data_sources/${DATA_SOURCE_ID}/query`,
+        {
+          method: "POST",
+          body: JSON.stringify(body),
+        }
+      );
+
+    records.push(
+      ...(response.results || [])
+    );
+
+    startCursor =
+      response.has_more
+        ? response.next_cursor
+        : null;
+  } while (startCursor);
+
+  return records;
+}
+
 async function updateNotionPage(
   pageId,
   properties
 ) {
   return notionRequest(
-    `https://api.notion.com/v1/pages/${pageId}`,
+    `/v1/pages/${pageId}`,
     {
       method: "PATCH",
-
       body: JSON.stringify({
         properties,
       }),
@@ -1255,632 +874,1074 @@ async function updateNotionPage(
   );
 }
 
+// ============================================================
+// Notion schema validation
+// ============================================================
 
-/* ============================================================
- * Step 1: Validate Environment
- * ============================================================
- */
+function validateNotionSchema(
+  dataSource
+) {
+  const properties =
+    dataSource.properties || {};
 
-console.log("\n========================================");
-console.log("Vocabulary Enrichment");
-console.log("========================================\n");
+  let valid = true;
 
-
-if (PREVIEW) {
-  console.log(
-    "MODE: Preview (Notion will NOT be changed)\n"
-  );
-} else {
-  console.log(
-    "MODE: Write (Notion will be updated)\n"
-  );
-}
-
-
-if (!NOTION_TOKEN) {
-  fail(
-    "NOTION_TOKEN is not set in .env"
-  );
-}
-
-
-if (!DATA_SOURCE_ID) {
-  fail(
-    "NOTION_VOCABULARY_DATA_SOURCE_ID is not set in .env"
-  );
-}
-
-
-console.log(
-  "Environment variables found."
-);
-
-console.log(
-  `Notion version: ${NOTION_VERSION}`
-);
-
-console.log(
-  `Data source ID: ${DATA_SOURCE_ID}\n`
-);
-
-
-/* ============================================================
- * Step 2: Verify the Notion Data Source
- * ============================================================
- */
-
-console.log(
-  "Step 1: Checking Notion data source..."
-);
-
-
-let dataSource;
-
-
-try {
-  dataSource =
-    await notionRequest(
-      `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}`
-    );
-} catch (error) {
-  fail(error.message);
-}
-
-
-const dataSourceTitle =
-  dataSource?.title
-    ?.map(
-      (item) =>
-        item.plain_text
-    )
-    .join("") ||
-  "Untitled";
-
-
-console.log(
-  `Connected to: ${dataSourceTitle}`
-);
-
-
-/* ============================================================
- * Step 3: Validate Notion Schema
- * ============================================================
- */
-
-console.log(
-  "\nStep 2: Validating Notion schema..."
-);
-
-
-const notionProperties =
-  dataSource.properties || {};
-
-
-let schemaErrors = 0;
-
-
-for (
-  const [
+  for (const [
     propertyName,
-    expectedType
-  ]
-  of Object.entries(
-    REQUIRED_PROPERTIES
-  )
-) {
-  const property =
-    notionProperties[propertyName];
+    expectedType,
+  ] of Object.entries(EXPECTED_SCHEMA)) {
+    const actual =
+      properties[propertyName];
 
+    if (!actual) {
+      console.log(
+        `  ✗ Missing property: ${propertyName}`
+      );
 
-  if (!property) {
-    console.error(
-      `  MISSING: ${propertyName} (expected ${expectedType})`
-    );
+      valid = false;
+      continue;
+    }
 
-    schemaErrors++;
+    if (actual.type !== expectedType) {
+      console.log(
+        `  ✗ ${propertyName}: expected ${expectedType}, found ${actual.type}`
+      );
 
-    continue;
-  }
+      valid = false;
+      continue;
+    }
 
-
-  if (
-    property.type !== expectedType
-  ) {
-    console.error(
-      `  WRONG TYPE: ${propertyName} — expected ${expectedType}, found ${property.type}`
-    );
-
-    schemaErrors++;
-
-    continue;
-  }
-
-
-  console.log(
-    `  ✓ ${propertyName} (${expectedType})`
-  );
-}
-
-
-if (
-  schemaErrors > 0
-) {
-  fail(
-    `Schema validation failed with ${schemaErrors} problem(s).`
-  );
-}
-
-
-console.log(
-  "Schema validation passed."
-);
-
-
-/* ============================================================
- * Step 4: Fetch All Notion Pages
- * ============================================================
- */
-
-console.log(
-  "\nStep 3: Fetching vocabulary records..."
-);
-
-
-const pages = [];
-
-let startCursor =
-  undefined;
-
-
-while (true) {
-  const body = {
-    page_size: 100,
-  };
-
-
-  if (startCursor) {
-    body.start_cursor =
-      startCursor;
-  }
-
-
-  const result =
-    await notionRequest(
-      `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}/query`,
-      {
-        method: "POST",
-
-        body:
-          JSON.stringify(body),
-      }
-    );
-
-
-  pages.push(
-    ...(result.results || [])
-  );
-
-
-  if (
-    !result.has_more
-  ) {
-    break;
-  }
-
-
-  startCursor =
-    result.next_cursor;
-
-
-  if (!startCursor) {
-    fail(
-      "Notion reported more records but did not provide a next cursor."
-    );
-  }
-}
-
-
-console.log(
-  `Found ${pages.length} records.`
-);
-
-
-/* ============================================================
- * Step 5: Convert Notion Records
- * ============================================================
- */
-
-console.log(
-  "\nStep 4: Preparing vocabulary records..."
-);
-
-
-const vocabulary =
-  pages.map(
-    pageToVocabularyRecord
-  );
-
-
-console.log(
-  `Prepared ${vocabulary.length} records.`
-);
-
-
-/* ============================================================
- * Step 6: Enrich Vocabulary
- * ============================================================
- */
-
-console.log(
-  "\nStep 5: Enriching vocabulary..."
-);
-
-
-let skippedComplete = 0;
-let lookupCount = 0;
-let enrichedCount = 0;
-let fallbackCount = 0;
-let noMatchCount = 0;
-let errorCount = 0;
-let updatedFieldCount = 0;
-
-
-for (
-  let index = 0;
-  index < vocabulary.length;
-  index++
-) {
-  const record =
-    vocabulary[index];
-
-
-  const number =
-    index + 1;
-
-
-  console.log(
-    `\n[${number}/${vocabulary.length}] ${record.term || "(missing Term)"}`
-  );
-
-
-  /*
-   * A record without a Term cannot be enriched.
-   */
-  if (!record.term) {
     console.log(
-      "  ⚠ Skipped: record has no Term."
+      `  ✓ ${propertyName} (${expectedType})`
     );
-
-    noMatchCount++;
-
-    continue;
   }
 
+  if (!valid) {
+    throw new Error(
+      "Notion schema validation failed."
+    );
+  }
 
-  const missingFields =
+  console.log(
+    "Schema validation passed."
+  );
+}
+
+// ============================================================
+// Convert Notion page to vocabulary record
+// ============================================================
+
+function notionPageToRecord(page) {
+  const properties =
+    page.properties || {};
+
+  return {
+    id: page.id,
+
+    term:
+      getTitleValue(
+        properties.Term
+      ),
+
+    source_preference:
+      getSelectValue(
+        properties["Source Preference"]
+      ),
+
+    short_definition:
+      getRichTextValue(
+        properties["Short Definition"]
+      ),
+
+    part_of_speech:
+      getSelectValue(
+        properties["Part of Speech"]
+      ),
+
+    etymology:
+      getRichTextValue(
+        properties.Etymology
+      ),
+
+    source:
+      getSelectValue(
+        properties.Source
+      ),
+
+    url:
+      getUrlValue(
+        properties.URL
+      ),
+
+    tags:
+      getMultiSelectValues(
+        properties.Tags
+      ),
+  };
+}
+
+// ============================================================
+// Enrichment
+// ============================================================
+
+/*
+ * Determine which fields are currently missing.
+ */
+function getMissingFields(record) {
+  const missing = [];
+
+  if (isEmpty(record.short_definition)) {
+    missing.push("short_definition");
+  }
+
+  if (isEmpty(record.part_of_speech)) {
+    missing.push("part_of_speech");
+  }
+
+  if (isEmpty(record.etymology)) {
+    missing.push("etymology");
+  }
+
+  if (isEmpty(record.source)) {
+    missing.push("source");
+  }
+
+  if (isEmpty(record.url)) {
+    missing.push("url");
+  }
+
+  return missing;
+}
+
+/*
+ * Add values from a source only to fields that are still
+ * missing.
+ *
+ * Existing Notion values always win.
+ */
+function applySourceResult(
+  result,
+  enriched
+) {
+  if (!result) {
+    return;
+  }
+
+  if (
+    isEmpty(enriched.short_definition) &&
+    !isEmpty(result.definition)
+  ) {
+    enriched.short_definition =
+      result.definition;
+  }
+
+  if (
+    isEmpty(enriched.part_of_speech) &&
+    !isEmpty(result.partOfSpeech)
+  ) {
+    enriched.part_of_speech =
+      result.partOfSpeech;
+  }
+
+  if (
+    isEmpty(enriched.etymology) &&
+    !isEmpty(result.etymology)
+  ) {
+    enriched.etymology =
+      result.etymology;
+  }
+
+  if (
+    isEmpty(enriched.source) &&
+    !isEmpty(result.sourceName)
+  ) {
+    enriched.source =
+      result.sourceName;
+  }
+
+  if (
+    isEmpty(enriched.url) &&
+    !isEmpty(result.url)
+  ) {
+    enriched.url =
+      result.url;
+  }
+}
+
+/*
+ * Determine whether a source actually provided something useful.
+ */
+function sourceProvidedUsefulData(
+  result,
+  before
+) {
+  if (!result) {
+    return false;
+  }
+
+  return (
+    (
+      isEmpty(before.short_definition) &&
+      !isEmpty(result.definition)
+    ) ||
+    (
+      isEmpty(before.part_of_speech) &&
+      !isEmpty(result.partOfSpeech)
+    ) ||
+    (
+      isEmpty(before.etymology) &&
+      !isEmpty(result.etymology)
+    ) ||
+    (
+      isEmpty(before.source) &&
+      !isEmpty(result.sourceName)
+    ) ||
+    (
+      isEmpty(before.url) &&
+      !isEmpty(result.url)
+    )
+  );
+}
+
+/*
+ * Enrich one vocabulary record.
+ */
+async function enrichRecord(record) {
+  const missingBefore =
     getMissingFields(record);
 
+  const enriched = {
+    ...record,
+  };
 
-  /*
-   * Everything is already populated.
-   */
-  if (
-    missingFields.length === 0
-  ) {
-    console.log(
-      "  ✓ Already complete — nothing to enrich."
-    );
+  const sourcesUsed = [];
+  const fallbackUsed = [];
 
-    skippedComplete++;
+  const preferredSource =
+    normalizeTerm(
+      record.source_preference
+    ) === "wikipedia"
+      ? "wikipedia"
+      : "dictionary";
 
-    continue;
-  }
+  const sourceOrder =
+    preferredSource === "wikipedia"
+      ? ["wikipedia", "dictionary"]
+      : ["dictionary", "wikipedia"];
 
+  let preferredSourceSucceeded = false;
 
-  console.log(
-    `  Missing: ${missingFields.join(", ")}`
-  );
+  // ----------------------------------------------------------
+  // First pass: preferred source
+  // ----------------------------------------------------------
 
-
-  console.log(
-    `  Source preference: ${record.source_preference || "dictionary (default)"}`
-  );
-
-
-  lookupCount++;
-
-
-  let result;
-
-
-  try {
-    result =
-      await enrichRecord(
-        record
-      );
-  } catch (error) {
-    console.log(
-      `  ⚠ Enrichment error: ${error.message}`
-    );
-
-    errorCount++;
-
-    continue;
-  }
-
-
-  /*
-   * Show which sources contributed information.
-   */
-  if (
-    result.sourcesUsed.length > 0
-  ) {
-    console.log(
-      `  Sources used: ${[
-        ...new Set(result.sourcesUsed)
-      ].join(", ")}`
-    );
-  }
-
-
-  /*
-   * If the preferred source did not supply a value but the
-   * second source did, report that fallback was used.
-   */
-  const uniqueSources =
-    [
-      ...new Set(
-        result.sourcesUsed
-      )
-    ];
-
-
-  if (
-    uniqueSources.length > 1
-  ) {
-    fallbackCount++;
-  }
-
-
-  const changes =
-    buildChanges(
-      record,
-      result.enrichment
-    );
-
-
-  const changedFields =
-    changedPropertyNames(
-      changes
-    );
-
-
-  /*
-   * Nothing could be added.
-   */
-  if (
-    changedFields.length === 0
-  ) {
+  for (const source of sourceOrder) {
+    /*
+     * Once the preferred source has supplied everything that
+     * it can reasonably supply, we don't need to call it again.
+     *
+     * We still allow the second source to fill fields that
+     * remain empty.
+     */
     if (
-      result.missingFields.length > 0
+      source === "dictionary"
+    ) {
+      /*
+       * FreeDictionaryAPI does not provide etymology, so it is
+       * still useful even when etymology is the only missing
+       * field. It may provide another missing field.
+       */
+      if (
+        isEmpty(enriched.short_definition) ||
+        isEmpty(enriched.part_of_speech) ||
+        isEmpty(enriched.source) ||
+        isEmpty(enriched.url)
+      ) {
+        try {
+          const before = {
+            ...enriched,
+          };
+
+          const result =
+            await lookupDictionary(
+              record.term
+            );
+
+          if (result) {
+            sourcesUsed.push(
+              formatSourceName(source)
+            );
+
+            if (
+              source === preferredSource
+            ) {
+              preferredSourceSucceeded =
+                sourceProvidedUsefulData(
+                  result,
+                  before
+                );
+            } else if (
+              sourceProvidedUsefulData(
+                result,
+                before
+              )
+            ) {
+              fallbackUsed.push(
+                formatSourceName(source)
+              );
+            }
+
+            applySourceResult(
+              result,
+              enriched
+            );
+          }
+        } catch (error) {
+          console.log(
+            `    ⚠ ${formatSourceName(source)} error: ${error.message}`
+          );
+        }
+
+        await sleep(REQUEST_DELAY);
+      }
+    }
+
+    if (
+      source === "wikipedia"
+    ) {
+      if (
+        isEmpty(enriched.short_definition) ||
+        isEmpty(enriched.source) ||
+        isEmpty(enriched.url)
+      ) {
+        try {
+          const before = {
+            ...enriched,
+          };
+
+          const result =
+            await lookupWikipedia(
+              record.term
+            );
+
+          if (result) {
+            sourcesUsed.push(
+              formatSourceName(source)
+            );
+
+            if (
+              source === preferredSource
+            ) {
+              preferredSourceSucceeded =
+                sourceProvidedUsefulData(
+                  result,
+                  before
+                );
+            } else if (
+              sourceProvidedUsefulData(
+                result,
+                before
+              )
+            ) {
+              fallbackUsed.push(
+                formatSourceName(source)
+              );
+            }
+
+            applySourceResult(
+              result,
+              enriched
+            );
+          } else {
+            console.log(
+              "    wikipedia: no usable entry"
+            );
+          }
+        } catch (error) {
+          console.log(
+            `    ⚠ ${formatSourceName(source)} error: ${error.message}`
+          );
+        }
+
+        await sleep(REQUEST_DELAY);
+      }
+    }
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * Wiktionary pass
+   * ----------------------------------------------------------
+   *
+   * Wiktionary is specifically responsible for filling a
+   * missing etymology.
+   *
+   * It is also allowed to fill URL if URL is empty, because
+   * the Wiktionary URL gives us a useful, word-specific source
+   * page.
+   *
+   * Existing Source values are NEVER overwritten.
+   */
+  if (
+    isEmpty(enriched.etymology) ||
+    isEmpty(enriched.url)
+  ) {
+    try {
+      const before = {
+        ...enriched,
+      };
+
+      const result =
+        await lookupWiktionary(
+          record.term
+        );
+
+      if (result) {
+        const providedUsefulData =
+          sourceProvidedUsefulData(
+            result,
+            before
+          );
+
+        if (providedUsefulData) {
+          sourcesUsed.push(
+            "Wiktionary.org"
+          );
+
+          /*
+           * Wiktionary is always a fallback/additional source
+           * in this workflow because Source Preference controls
+           * the primary definition source.
+           */
+          fallbackUsed.push(
+            "Wiktionary.org"
+          );
+        }
+
+        applySourceResult(
+          result,
+          enriched
+        );
+      } else {
+        console.log(
+          "    wiktionary: no usable entry"
+        );
+      }
+    } catch (error) {
+      console.log(
+        `    ⚠ Wiktionary.org error: ${error.message}`
+      );
+    }
+
+    await sleep(REQUEST_DELAY);
+  }
+
+  /*
+   * Remove duplicate source names while preserving order.
+   */
+  const uniqueSourcesUsed = [
+    ...new Set(sourcesUsed),
+  ];
+
+  const uniqueFallbacks = [
+    ...new Set(fallbackUsed),
+  ];
+
+  return {
+    record,
+    enriched,
+    missingBefore,
+    sourcesUsed: uniqueSourcesUsed,
+    fallbackUsed: uniqueFallbacks,
+    preferredSourceSucceeded,
+  };
+}
+
+// ============================================================
+// Build Notion changes
+// ============================================================
+
+/*
+ * Build a Notion properties object containing ONLY fields that
+ * were originally empty.
+ *
+ * This is an important safety check.
+ *
+ * Even if enrichment somehow produces a different value for a
+ * field that already contained data, that field will not be
+ * included in the PATCH request.
+ */
+function buildChanges(
+  original,
+  enriched
+) {
+  const properties = {};
+  const changes = [];
+
+  if (
+    isEmpty(original.short_definition) &&
+    !isEmpty(enriched.short_definition)
+  ) {
+    properties["Short Definition"] = {
+      rich_text: [
+        {
+          type: "text",
+          text: {
+            content:
+              enriched.short_definition,
+          },
+        },
+      ],
+    };
+
+    changes.push({
+      field: "Short Definition",
+      value:
+        enriched.short_definition,
+    });
+  }
+
+  if (
+    isEmpty(original.part_of_speech) &&
+    !isEmpty(enriched.part_of_speech)
+  ) {
+    properties["Part of Speech"] = {
+      select: {
+        name:
+          enriched.part_of_speech,
+      },
+    };
+
+    changes.push({
+      field: "Part of Speech",
+      value:
+        enriched.part_of_speech,
+    });
+  }
+
+  if (
+    isEmpty(original.etymology) &&
+    !isEmpty(enriched.etymology)
+  ) {
+    properties.Etymology = {
+      rich_text: [
+        {
+          type: "text",
+          text: {
+            content:
+              enriched.etymology,
+          },
+        },
+      ],
+    };
+
+    changes.push({
+      field: "Etymology",
+      value:
+        enriched.etymology,
+    });
+  }
+
+  if (
+    isEmpty(original.source) &&
+    !isEmpty(enriched.source)
+  ) {
+    properties.Source = {
+      select: {
+        name:
+          enriched.source,
+      },
+    };
+
+    changes.push({
+      field: "Source",
+      value:
+        enriched.source,
+    });
+  }
+
+  if (
+    isEmpty(original.url) &&
+    !isEmpty(enriched.url)
+  ) {
+    properties.URL = {
+      url:
+        enriched.url,
+    };
+
+    changes.push({
+      field: "URL",
+      value:
+        enriched.url,
+    });
+  }
+
+  return {
+    properties,
+    changes,
+  };
+}
+
+// ============================================================
+// Display helpers
+// ============================================================
+
+function displayChange(change) {
+  console.log(
+    `    ${change.field}: ${change.value}`
+  );
+}
+
+function displayMissingFields(
+  missing
+) {
+  return missing
+    .map((field) =>
+      field.replaceAll("_", " ")
+    )
+    .join(", ");
+}
+
+// ============================================================
+// Main
+// ============================================================
+
+async function main() {
+  console.log("");
+  console.log("========================================");
+  console.log("Vocabulary Enrichment");
+  console.log("========================================");
+  console.log("");
+
+  console.log(
+    PREVIEW_MODE
+      ? "MODE: Preview (Notion will NOT be changed)"
+      : "MODE: Write (Notion WILL be updated)"
+  );
+
+  console.log("");
+
+  // ----------------------------------------------------------
+  // Validate environment
+  // ----------------------------------------------------------
+
+  if (!NOTION_TOKEN) {
+    throw new Error(
+      "Missing NOTION_TOKEN environment variable."
+    );
+  }
+
+  if (!DATA_SOURCE_ID) {
+    throw new Error(
+      "Missing NOTION_VOCABULARY_DATA_SOURCE_ID environment variable."
+    );
+  }
+
+  console.log(
+    "Environment variables found."
+  );
+
+  console.log(
+    `Notion version: ${NOTION_VERSION}`
+  );
+
+  console.log(
+    `Data source ID: ${DATA_SOURCE_ID}`
+  );
+
+  console.log("");
+
+  // ----------------------------------------------------------
+  // Step 1: Check Notion data source
+  // ----------------------------------------------------------
+
+  console.log(
+    "Step 1: Checking Notion data source..."
+  );
+
+  const dataSource =
+    await getDataSource();
+
+  console.log(
+    `Connected to: ${
+      dataSource.title?.[0]?.plain_text ||
+      "Vocabulary"
+    }`
+  );
+
+  console.log("");
+
+  // ----------------------------------------------------------
+  // Step 2: Validate schema
+  // ----------------------------------------------------------
+
+  console.log(
+    "Step 2: Validating Notion schema..."
+  );
+
+  validateNotionSchema(
+    dataSource
+  );
+
+  console.log("");
+
+  // ----------------------------------------------------------
+  // Step 3: Fetch records
+  // ----------------------------------------------------------
+
+  console.log(
+    "Step 3: Fetching vocabulary records..."
+  );
+
+  const pages =
+    await queryDataSource();
+
+  console.log(
+    `Found ${pages.length} records.`
+  );
+
+  console.log("");
+
+  // ----------------------------------------------------------
+  // Step 4: Prepare records
+  // ----------------------------------------------------------
+
+  console.log(
+    "Step 4: Preparing vocabulary records..."
+  );
+
+  const records =
+    pages
+      .map(notionPageToRecord)
+      .filter((record) => {
+        if (!record.term) {
+          console.log(
+            `  ⚠ Skipping record ${record.id}: missing Term`
+          );
+
+          return false;
+        }
+
+        return true;
+      });
+
+  console.log(
+    `Prepared ${records.length} records.`
+  );
+
+  console.log("");
+
+  // ----------------------------------------------------------
+  // Step 5: Enrich
+  // ----------------------------------------------------------
+
+  console.log(
+    "Step 5: Enriching vocabulary..."
+  );
+
+  console.log("");
+
+  let alreadyComplete = 0;
+  let recordsLookedUp = 0;
+  let recordsEnriched = 0;
+  let fallbackUsedCount = 0;
+  let noUsableMatch = 0;
+  let errors = 0;
+  let fieldsProposed = 0;
+  let recordsWritten = 0;
+
+  for (
+    let index = 0;
+    index < records.length;
+    index += 1
+  ) {
+    const record =
+      records[index];
+
+    const missingBefore =
+      getMissingFields(record);
+
+    console.log(
+      `[${index + 1}/${records.length}] ${record.term}`
+    );
+
+    if (
+      missingBefore.length === 0
     ) {
       console.log(
-        `  ⚠ Still missing: ${result.missingFields.join(", ")}`
+        "  ✓ Complete — nothing to enrich."
+      );
+
+      console.log("");
+
+      alreadyComplete += 1;
+
+      continue;
+    }
+
+    console.log(
+      `  Missing: ${displayMissingFields(
+        missingBefore
+      )}`
+    );
+
+    console.log(
+      `  Source preference: ${
+        record.source_preference || "dictionary"
+      }`
+    );
+
+    recordsLookedUp += 1;
+
+    let result;
+
+    try {
+      result =
+        await enrichRecord(
+          record
+        );
+    } catch (error) {
+      errors += 1;
+
+      console.log(
+        `  ✗ Error: ${error.message}`
+      );
+
+      console.log("");
+
+      continue;
+    }
+
+    if (
+      result.sourcesUsed.length > 0
+    ) {
+      console.log(
+        `  Sources used: ${
+          result.sourcesUsed.join(", ")
+        }`
       );
     } else {
       console.log(
-        "  ✓ No additional changes needed."
+        "  Sources used: none"
       );
     }
 
+    if (
+      result.fallbackUsed.length > 0
+    ) {
+      console.log(
+        `  Fallback/additional sources: ${
+          result.fallbackUsed.join(", ")
+        }`
+      );
 
-    noMatchCount++;
+      fallbackUsedCount += 1;
+    }
 
-    continue;
+    const {
+      properties,
+      changes,
+    } =
+      buildChanges(
+        record,
+        result.enriched
+      );
+
+    if (
+      changes.length > 0
+    ) {
+      console.log(
+        "  Proposed changes:"
+      );
+
+      for (
+        const change of changes
+      ) {
+        displayChange(change);
+      }
+
+      fieldsProposed +=
+        changes.length;
+
+      recordsEnriched += 1;
+
+      if (!PREVIEW_MODE) {
+        try {
+          await updateNotionPage(
+            record.id,
+            properties
+          );
+
+          console.log(
+            "  ✓ Notion updated."
+          );
+
+          recordsWritten += 1;
+        } catch (error) {
+          errors += 1;
+
+          console.log(
+            `  ✗ Notion update failed: ${error.message}`
+          );
+        }
+      }
+    }
+
+    const missingAfter =
+      getMissingFields(
+        result.enriched
+      );
+
+    if (
+      missingAfter.length > 0
+    ) {
+      console.log(
+        `  ⚠ Still missing: ${
+          displayMissingFields(
+            missingAfter
+          )
+        }`
+      );
+    }
+
+    if (
+      changes.length === 0
+    ) {
+      noUsableMatch += 1;
+    }
+
+    console.log("");
+
+    /*
+     * A small pause between vocabulary records prevents the
+     * script from making a large burst of external requests.
+     */
+    await sleep(
+      REQUEST_DELAY
+    );
   }
 
+  // ----------------------------------------------------------
+  // Summary
+  // ----------------------------------------------------------
 
   console.log(
-    `  Proposed changes: ${changedFields.join(", ")}`
+    "========================================"
   );
 
+  console.log(
+    "ENRICHMENT COMPLETE"
+  );
 
-  /*
-   * Show the actual proposed values in preview mode.
-   */
-  if (PREVIEW) {
-    if (
-      changes["Short Definition"]
-    ) {
-      console.log(
-        `    Short Definition: ${result.enrichment.short_definition}`
-      );
-    }
+  console.log(
+    "========================================"
+  );
 
+  console.log(
+    `Mode:               ${
+      PREVIEW_MODE
+        ? "Preview"
+        : "Write"
+    }`
+  );
 
-    if (
-      changes["Part of Speech"]
-    ) {
-      console.log(
-        `    Part of Speech: ${result.enrichment.part_of_speech}`
-      );
-    }
+  console.log(
+    `Records found:      ${records.length}`
+  );
 
+  console.log(
+    `Already complete:   ${alreadyComplete}`
+  );
 
-    if (
-      changes["Etymology"]
-    ) {
-      console.log(
-        `    Etymology: ${result.enrichment.etymology}`
-      );
-    }
+  console.log(
+    `Records looked up:  ${recordsLookedUp}`
+  );
 
+  console.log(
+    `Records enriched:   ${recordsEnriched}`
+  );
 
-    if (
-      changes["Source"]
-    ) {
-      console.log(
-        `    Source: ${result.enrichment.source}`
-      );
-    }
+  console.log(
+    `Fallback used:      ${fallbackUsedCount}`
+  );
 
+  console.log(
+    `No usable match:    ${noUsableMatch}`
+  );
 
-    if (
-      changes["URL"]
-    ) {
-      console.log(
-        `    URL: ${result.enrichment.url}`
-      );
-    }
+  console.log(
+    `Errors:             ${errors}`
+  );
 
+  console.log(
+    `Fields proposed:    ${fieldsProposed}`
+  );
 
-    if (
-      result.missingFields.length > 0
-    ) {
-      console.log(
-        `    Still missing: ${result.missingFields.join(", ")}`
-      );
-    }
-
-
-    enrichedCount++;
-
-    updatedFieldCount +=
-      changedFields.length;
-
-
-    continue;
+  if (!PREVIEW_MODE) {
+    console.log(
+      `Records written:    ${recordsWritten}`
+    );
   }
 
+  console.log("");
 
-  /* ----------------------------------------------------------
-   * WRITE MODE
-   * ----------------------------------------------------------
-   *
-   * Only empty fields are included in the PATCH request.
-   *
-   * Existing Notion values are never sent back as updates.
-   */
-
-  try {
-    await updateNotionPage(
-      record.id,
-      changes
+  if (PREVIEW_MODE) {
+    console.log(
+      "Preview mode did not modify Notion."
     );
-
 
     console.log(
-      `  ✓ Updated Notion: ${changedFields.join(", ")}`
+      "Review the proposed changes above."
     );
 
-
-    if (
-      result.missingFields.length > 0
-    ) {
-      console.log(
-        `    Still missing: ${result.missingFields.join(", ")}`
-      );
-    }
-
-
-    enrichedCount++;
-
-    updatedFieldCount +=
-      changedFields.length;
-  } catch (error) {
     console.log(
-      `  ⚠ Failed to update Notion: ${error.message}`
+      "If they look correct, run:"
     );
 
-    errorCount++;
+    console.log("");
+
+    console.log(
+      "  node _scripts/enrich-vocabulary.mjs"
+    );
+  } else {
+    console.log(
+      "Notion enrichment is complete."
+    );
+
+    console.log(
+      "Next step:"
+    );
+
+    console.log("");
+
+    console.log(
+      "  node _scripts/export-vocabulary.mjs"
+    );
   }
+
+  console.log("");
 }
 
+// ============================================================
+// Run
+// ============================================================
 
-/* ============================================================
- * Step 7: Summary
- * ============================================================
- */
-
-console.log(
-  "\n========================================"
-);
-
-console.log(
-  "ENRICHMENT COMPLETE"
-);
-
-console.log(
-  "========================================\n"
-);
-
-
-console.log(
-  `Mode:               ${PREVIEW ? "Preview" : "Write"}`
-);
-
-console.log(
-  `Records found:      ${vocabulary.length}`
-);
-
-console.log(
-  `Already complete:   ${skippedComplete}`
-);
-
-console.log(
-  `Records looked up:  ${lookupCount}`
-);
-
-console.log(
-  `Records enriched:   ${enrichedCount}`
-);
-
-console.log(
-  `Fallback used:      ${fallbackCount}`
-);
-
-console.log(
-  `No usable match:    ${noMatchCount}`
-);
-
-console.log(
-  `Errors:             ${errorCount}`
-);
-
-console.log(
-  `Fields ${PREVIEW ? "proposed" : "updated"}: ${updatedFieldCount}`
-);
-
-
-if (PREVIEW) {
-  console.log(
-    "\nPreview mode did not modify Notion."
+main().catch((error) => {
+  console.error("");
+  console.error(
+    "========================================"
   );
-
-  console.log(
-    "Review the proposed changes above."
+  console.error(
+    "ENRICHMENT FAILED"
   );
-
-  console.log(
-    "If they look correct, run:"
+  console.error(
+    "========================================"
   );
-
-  console.log(
-    "\n  node _scripts/enrich-vocabulary.mjs"
+  console.error("");
+  console.error(
+    error.message
   );
-} else {
-  console.log(
-    "\nNotion has been updated."
-  );
+  console.error("");
 
-  console.log(
-    "Next step: export the enriched vocabulary to YAML:"
-  );
-
-  console.log(
-    "\n  node _scripts/export-vocabulary.mjs"
-  );
-}
-
-
-console.log("");
+  process.exit(1);
+});
