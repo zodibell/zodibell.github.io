@@ -429,4 +429,46 @@ async function main() {
 
   // ----------------------------------------------------------
   // Step 7: Show export plan
-  //
+  // ----------------------------------------------------------
+
+  console.log("\n==============================================");
+  console.log("EXPORT PLAN");
+  console.log("==============================================");
+
+  sortedRecords.forEach((record) => {
+    console.log(`EXPORT: ${record.term}`);
+  });
+
+  console.log("\n==============================================");
+  console.log("EXPORT SUMMARY");
+  console.log("==============================================");
+
+  console.log(`Records in Notion: ${sortedRecords.length}`);
+  console.log(`Records to export:  ${sortedRecords.length}`);
+  console.log(`Destination:        ${YAML_PATH}`);
+
+  // ----------------------------------------------------------
+  // Step 8: Preview or write
+  // ----------------------------------------------------------
+
+  if (PREVIEW) {
+    console.log("\nNo changes were made to vocabulary.yml.");
+    return;
+  }
+
+  console.log("\nWriting vocabulary.yml...");
+
+  writeYaml(sortedRecords);
+
+  console.log("✓ vocabulary.yml updated successfully.");
+
+  console.log("\n==============================================");
+  console.log("EXPORT COMPLETE");
+  console.log("==============================================");
+}
+
+main().catch((error) => {
+  console.error("\nERROR:");
+  console.error(error.message);
+  process.exit(1);
+});
