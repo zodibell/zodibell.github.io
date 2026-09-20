@@ -2,7 +2,7 @@
   source_preference: wikipedia
   short_definition: An anarchist organizational model that centers trade unions as a vehicle for class conflict.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Anarcho-syndicalism
   tags:
@@ -13,7 +13,7 @@
   source_preference: dictionary
   short_definition: Immortality.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/athanasia
   tags:
@@ -22,7 +22,7 @@
   source_preference: dictionary
   short_definition: An elite group of intellectuals; learned people, the literati.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/clerisy
   tags:
@@ -33,7 +33,7 @@
   source_preference: wikipedia
   short_definition: A political and economic ideology whose goal is the creation of a communist society, a socioeconomic order centered on common ownership of the means of production, distribution, and exchange that allocates products in society based on need.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Communism
   tags:
@@ -46,7 +46,7 @@
   source_preference: dictionary
   short_definition: Having mood swings between happy and sad.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Cyclothymia
   tags:
@@ -55,7 +55,7 @@
   source_preference: dictionary
   short_definition: Radiant, resplendent, shining.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/effulgent
   tags:
@@ -64,7 +64,7 @@
   source_preference: dictionary
   short_definition: An image or representation of an idea; a representation of an ideal form; an apparition of some actual or imaginary entity, or of some aspect of reality.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/eidolon
   tags:
@@ -73,7 +73,7 @@
   source_preference: dictionary
   short_definition: Ambitious or competitive.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/emulous
   tags:
@@ -82,7 +82,7 @@
   source_preference: dictionary
   short_definition: (obsolete) A feast or banquet.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/epulation
   tags:
@@ -91,7 +91,7 @@
   source_preference: dictionary
   short_definition: Impish or playful behaviour; mischief.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/espieglerie
   tags:
@@ -100,7 +100,7 @@
   source_preference: dictionary
   short_definition: One who is greedy or hungry.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/esurient
   tags:
@@ -109,7 +109,7 @@
   source_preference: dictionary
   short_definition: (intransitive) To protest or remonstrate; to reason earnestly with a person on some impropriety of conduct [(often) with with].
   part_of_speech: verb
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/expostulate
   tags:
@@ -118,7 +118,7 @@
   source_preference: wikipedia
   short_definition: A far-right, authoritarian, and ultranationalist political ideology and movement that rose to prominence in early-20th-century Europe.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Fascism
   tags:
@@ -129,7 +129,7 @@
   source_preference: dictionary
   short_definition: Very cold; icy or frosty.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/gelid
   tags:
@@ -138,7 +138,7 @@
   source_preference: wikipedia
   short_definition: The official secret police of Nazi Germany and in German-occupied Europe.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Gestapo
   tags:
@@ -149,7 +149,7 @@
   source_preference: dictionary
   short_definition: Being in a beginning or early stage; incipient.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/inchoate
   tags:
@@ -158,7 +158,7 @@
   source_preference: dictionary
   short_definition: Casually unconcerned; carefree, indifferent, nonchalant.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/insouciant
   tags:
@@ -167,7 +167,7 @@
   source_preference: dictionary
   short_definition: Tastelessly gaudy; superficially attractive but having in reality no value or substance; falsely alluring.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/meretricious
   tags:
@@ -176,7 +176,7 @@
   source_preference: dictionary
   short_definition: A thing as it is independent of any conceptualization or perception by the human mind, postulated by practical reason but existing in a condition which is in principle unknowable and unexperienceable.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/noumena
   tags:
@@ -185,16 +185,16 @@
   source_preference: dictionary
   short_definition: That which brings omens, monsters, or strange manifestations.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
-  url: ''
+  url: null
   tags:
     - adjectives
 - term: pellucid
   source_preference: dictionary
   short_definition: Allowing the passage of light; transparent.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/pellucid
   tags:
@@ -203,7 +203,7 @@
   source_preference: dictionary
   short_definition: Of, pertaining to, or representing perfidy; disloyal to what should command one's fidelity or allegiance.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perfidious
   tags:
@@ -212,7 +212,7 @@
   source_preference: dictionary
   short_definition: (rare, formal, ambitransitive) To shudder (at). [from 19th c.]
   part_of_speech: verb
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perhorresce
   tags:
@@ -221,7 +221,7 @@
   source_preference: dictionary
   short_definition: Of acute discernment; having keen insight; mentally perceptive.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perspicacious
   tags:
@@ -230,7 +230,7 @@
   source_preference: wikipedia
   short_definition: Members of a society whose possession of significant economic value is their labor power.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Proletariat
   tags:
@@ -243,7 +243,7 @@
   source_preference: dictionary
   short_definition: Irritating, repellent.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/rebarbative
   tags:
@@ -252,7 +252,7 @@
   source_preference: dictionary
   short_definition: A restorative tonic.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/roborant
   tags:
@@ -262,7 +262,7 @@
   source_preference: dictionary
   short_definition: Sluggishness; negligence, slowness, slothfulness; also barrenness.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: Wiktionary.org
   url: https://en.wiktionary.org/wiki/segnity
   tags:
@@ -272,7 +272,7 @@
   source_preference: dictionary
   short_definition: A position that requires no work but still gives an ample payment; a cushy job.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/sinecure
   tags:
@@ -282,7 +282,7 @@
   source_preference: dictionary
   short_definition: (philosophy) The idea that the self is all that exists or that can be proven to exist.
   part_of_speech: noun
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/solipsism
   tags:
@@ -291,7 +291,7 @@
   source_preference: dictionary
   short_definition: Random, randomly determined.
   part_of_speech: adjective
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/stochastic
   tags:
@@ -300,7 +300,7 @@
   source_preference: dictionary
   short_definition: To be servile or submissive.
   part_of_speech: verb
-  etymology: ''
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/truckle
   tags:
