@@ -1,72 +1,96 @@
 import "dotenv/config";
 import fs from "fs";
-import path from "path";
 import * as yaml from "js-yaml";
 
-// ============================================================
-// Zodi Bell Vocabulary — Notion → YAML Export
-// ============================================================
-//
-// This script exports the Vocabulary database in Notion to:
-//
-//   _data/vocabulary.yml
-//
-// MODES:
-//
-// Preview:
-//   node _scripts/export-vocabulary.mjs --preview
-//
-// Write:
-//   node _scripts/export-vocabulary.mjs
-//
-// Preview mode does NOT modify the YAML file.
-//
-// The goal of this script is to make Notion the source of truth
-// while allowing the existing Jekyll site to continue using:
-//
-//   _data/vocabulary.yml
-//
-// IMPORTANT:
-// - This script reads from Notion.
-// - This script never changes Notion.
-// - The exported YAML replaces the existing vocabulary.yml
-//   only when run without --preview.
-// ============================================================
+/*
+ * Vocabulary Export — Notion → Jekyll YAML
+ *
+ * Purpose:
+ *   Export the Notion Vocabulary database to:
+ *
+ *     _data/vocabulary.yml
+ *
+ * This allows Notion to become the source of truth while
+ * keeping the existing Jekyll vocabulary page working.
+ *
+ * MODES:
+ *
+ * Preview:
+ *   node _scripts/export-vocabulary.mjs --preview
+ *
+ * Write:
+ *   node _scripts/export-vocabulary.mjs
+ *
+ * Preview mode:
+ *   - Reads from Notion
+ *   - Validates the database
+ *   - Converts records
+ *   - Shows the export plan
+ *   - Does NOT modify any files
+ *
+ * Write mode:
+ *   - Performs all of the same validation
+ *   - Writes the exported records to:
+ *
+ *       _data/vocabulary.yml
+ *
+ * The script does not enrich or modify Notion.
+ * It is strictly a Notion → YAML export.
+ *
+ * Expected Notion properties:
+ *
+ *   Term              → title
+ *   Source Preference → select
+ *   Short Definition  → rich_text
+ *   Part of Speech    → select
+ *   Etymology         → rich_text
+ *   Source            → select
+ *   URL               → url
+ *   Tags              → multi_select
+ *
+ * Environment variables:
+ *
+ *   NOTION_TOKEN
+ *   NOTION_VOCABULARY_DATA_SOURCE_ID
+ *
+ * Optional:
+ *
+ *   NOTION_VERSION
+ *
+ * IMPORTANT:
+ *   This script intentionally preserves the values stored in Notion.
+ *   It does not attempt to "clean up" or correct vocabulary data.
+ */
 
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const DATA_SOURCE_ID = process.env.NOTION_VOCABULARY_DATA_SOURCE_ID;
 const NOTION_VERSION = process.env.NOTION_VERSION || "2026-03-11";
 
-const ROOT_DIR = process.cwd();
-const YAML_PATH = path.join(ROOT_DIR, "_data", "vocabulary.yml");
-
+const OUTPUT_FILE = "_data/vocabulary.yml";
 const PREVIEW = process.argv.includes("--preview");
 
-// ============================================================
-// Configuration
-// ============================================================
+const REQUIRED_PROPERTIES = {
+  "Term": "title",
+  "Source Preference": "select",
+  "Short Definition": "rich_text",
+  "Part of Speech": "select",
+  "Etymology": "rich_text",
+  "Source": "select",
+  "URL": "url",
+  "Tags": "multi_select",
+};
 
-const NOTION_API_BASE = "https://api.notion.com/v1";
 
-// ============================================================
-// Validation
-// ============================================================
+/* ============================================================
+ * Helpers
+ * ============================================================
+ */
 
-if (!NOTION_TOKEN) {
-  console.error("ERROR: NOTION_TOKEN is not set in .env");
+function fail(message) {
+  console.error(`\nERROR: ${message}`);
   process.exit(1);
 }
 
-if (!DATA_SOURCE_ID) {
-  console.error(
-    "ERROR: NOTION_VOCABULARY_DATA_SOURCE_ID is not set in .env"
-  );
-  process.exit(1);
-}
-
-// ============================================================
-// Helpers
-// ============================================================
 
 function notionHeaders() {
   return {
@@ -75,6 +99,7 @@ function notionHeaders() {
     "Content-Type": "application/json",
   };
 }
+
 
 async function notionRequest(url, options = {}) {
   const response = await fetch(url, {
@@ -85,390 +110,450 @@ async function notionRequest(url, options = {}) {
     },
   });
 
-  if (!response.ok) {
-    const body = await response.text();
+  const text = await response.text();
 
+  let data;
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
     throw new Error(
-      `Notion API request failed (${response.status} ${response.statusText})\n${body}`
+      `Notion returned invalid JSON (HTTP ${response.status}).`
     );
   }
 
-  return response.json();
-}
+  if (!response.ok) {
+    const message =
+      data?.message ||
+      data?.error ||
+      `HTTP ${response.status}`;
 
-// ============================================================
-// Notion property readers
-// ============================================================
-
-function getTitle(property) {
-  if (!property || property.type !== "title") {
-    return "";
+    throw new Error(`Notion API error: ${message}`);
   }
 
-  return property.title
-    ?.map((item) => item.plain_text || "")
-    .join("")
-    .trim() || "";
+  return data;
 }
 
+
+/*
+ * Return the plain text contained in a Notion rich_text property.
+ *
+ * IMPORTANT:
+ * Blank Notion rich-text fields are returned as null rather than
+ * an empty string. This preserves the representation used by the
+ * original vocabulary.yml file.
+ */
 function getRichText(property) {
-  if (!property || property.type !== "rich_text") {
-    return "";
-  }
+  const value = property?.rich_text
+    ?.map((item) => item.plain_text)
+    .join("");
 
-  return property.rich_text
-    ?.map((item) => item.plain_text || "")
-    .join("")
-    .trim() || "";
+  return value || null;
 }
 
+
+/*
+ * Return the selected value from a Notion select property.
+ */
 function getSelect(property) {
-  if (!property || property.type !== "select") {
-    return "";
-  }
-
-  return property.select?.name || "";
+  return property?.select?.name ?? null;
 }
 
+
+/*
+ * Return the URL from a Notion URL property.
+ *
+ * IMPORTANT:
+ * Blank Notion URL fields are returned as null rather than
+ * an empty string.
+ */
 function getUrl(property) {
-  if (!property || property.type !== "url") {
-    return "";
-  }
-
-  return property.url || "";
+  return property?.url || null;
 }
 
-function getMultiSelect(property) {
-  if (!property || property.type !== "multi_select") {
-    return [];
-  }
 
+/*
+ * Return the title text from a Notion title property.
+ */
+function getTitle(property) {
+  const value = property?.title
+    ?.map((item) => item.plain_text)
+    .join("");
+
+  return value || null;
+}
+
+
+/*
+ * Return the names from a Notion multi-select property.
+ */
+function getMultiSelect(property) {
   return (
-    property.multi_select
+    property?.multi_select
       ?.map((item) => item.name)
       .filter(Boolean) || []
   );
 }
 
-// ============================================================
-// Fetch data source
-// ============================================================
 
-async function fetchDataSource() {
-  console.log("Checking Notion data source...");
-
-  const dataSource = await notionRequest(
-    `${NOTION_API_BASE}/data_sources/${DATA_SOURCE_ID}`
-  );
-
-  console.log(
-    `✓ Connected to Notion data source: ${
-      dataSource.title?.[0]?.plain_text || "Vocabulary"
-    }`
-  );
-
-  return dataSource;
+/*
+ * Normalize terms for comparison.
+ *
+ * This lets us identify the same word even if capitalization
+ * differs.
+ */
+function normalizeTerm(term) {
+  return String(term || "")
+    .trim()
+    .toLowerCase();
 }
 
-// ============================================================
-// Validate Notion schema
-// ============================================================
 
-function validateSchema(dataSource) {
-  console.log("\nChecking Notion property schema...");
-
-  const properties = dataSource.properties || {};
-
-  const requiredProperties = {
-    Term: "title",
-    "Source Preference": "select",
-    "Short Definition": "rich_text",
-    "Part of Speech": "select",
-    Etymology: "rich_text",
-    Source: "select",
-    URL: "url",
-    Tags: "multi_select",
-  };
-
-  const errors = [];
-
-  for (const [name, expectedType] of Object.entries(requiredProperties)) {
-    if (!properties[name]) {
-      errors.push(`Missing property: ${name}`);
-      continue;
-    }
-
-    if (properties[name].type !== expectedType) {
-      errors.push(
-        `${name}: expected ${expectedType}, found ${properties[name].type}`
-      );
-    }
-  }
-
-  if (errors.length > 0) {
-    console.error("\nERROR: Notion property schema does not match expectations.\n");
-
-    for (const error of errors) {
-      console.error(`  - ${error}`);
-    }
-
-    process.exit(1);
-  }
-
-  console.log("✓ Notion property schema looks correct.");
-}
-
-// ============================================================
-// Fetch all vocabulary pages
-// ============================================================
-//
-// Notion paginates database/data-source queries.
-// This function continues requesting pages until there are no
-// more results.
-//
-
-async function fetchAllPages() {
-  console.log("\nFetching Vocabulary records from Notion...");
-
-  const pages = [];
-  let startCursor = undefined;
-
-  while (true) {
-    const body = {
-      page_size: 100,
-    };
-
-    if (startCursor) {
-      body.start_cursor = startCursor;
-    }
-
-    const result = await notionRequest(
-      `${NOTION_API_BASE}/data_sources/${DATA_SOURCE_ID}/query`,
-      {
-        method: "POST",
-        body: JSON.stringify(body),
-      }
-    );
-
-    pages.push(...(result.results || []));
-
-    if (!result.has_more) {
-      break;
-    }
-
-    startCursor = result.next_cursor;
-  }
-
-  console.log(`✓ Found ${pages.length} Vocabulary record(s).`);
-
-  return pages;
-}
-
-// ============================================================
-// Convert Notion page → YAML record
-// ============================================================
-
+/*
+ * Convert a Notion page into the YAML vocabulary format.
+ */
 function pageToVocabularyRecord(page) {
-  const properties = page.properties || {};
+  const properties = page.properties;
 
   return {
-    term: getTitle(properties.Term),
+    term: getTitle(properties["Term"]),
     source_preference: getSelect(properties["Source Preference"]),
     short_definition: getRichText(properties["Short Definition"]),
     part_of_speech: getSelect(properties["Part of Speech"]),
-    etymology: getRichText(properties.Etymology),
-    source: getSelect(properties.Source),
-    url: getUrl(properties.URL),
-    tags: getMultiSelect(properties.Tags),
+    etymology: getRichText(properties["Etymology"]),
+    source: getSelect(properties["Source"]),
+    url: getUrl(properties["URL"]),
+    tags: getMultiSelect(properties["Tags"]),
   };
 }
 
-// ============================================================
-// Validate exported records
-// ============================================================
 
-function validateVocabulary(records) {
-  console.log("\nValidating exported vocabulary...");
+/* ============================================================
+ * Step 1: Validate environment
+ * ============================================================
+ */
 
-  const errors = [];
-  const terms = new Set();
+console.log("\n========================================");
+console.log("Vocabulary Export — Notion → YAML");
+console.log("========================================\n");
 
-  records.forEach((record, index) => {
-    const label = `Record ${index + 1}`;
-
-    if (!record.term) {
-      errors.push(`${label}: missing term`);
-    }
-
-    const normalizedTerm = record.term.toLowerCase();
-
-    if (terms.has(normalizedTerm)) {
-      errors.push(`Duplicate term: ${record.term}`);
-    }
-
-    terms.add(normalizedTerm);
-
-    if (!Array.isArray(record.tags)) {
-      errors.push(`${record.term}: tags must be an array`);
-    }
-  });
-
-  if (errors.length > 0) {
-    console.error("\nERROR: Export validation failed.\n");
-
-    for (const error of errors) {
-      console.error(`  - ${error}`);
-    }
-
-    process.exit(1);
-  }
-
-  console.log("✓ Export validation passed.");
+if (PREVIEW) {
+  console.log("MODE: Preview (no files will be changed)\n");
+} else {
+  console.log("MODE: Write\n");
 }
 
-// ============================================================
-// Sort vocabulary
-// ============================================================
+if (!NOTION_TOKEN) {
+  fail("NOTION_TOKEN is not set in .env");
+}
 
-function sortVocabulary(records) {
-  return [...records].sort((a, b) =>
-    a.term.localeCompare(b.term, undefined, {
-      sensitivity: "base",
-    })
+if (!DATA_SOURCE_ID) {
+  fail("NOTION_VOCABULARY_DATA_SOURCE_ID is not set in .env");
+}
+
+console.log("Environment variables found.");
+console.log(`Notion version: ${NOTION_VERSION}`);
+console.log(`Data source ID: ${DATA_SOURCE_ID}`);
+console.log(`Output file: ${OUTPUT_FILE}\n`);
+
+
+/* ============================================================
+ * Step 2: Verify the Notion data source
+ * ============================================================
+ */
+
+console.log("Step 1: Checking Notion data source...");
+
+let dataSource;
+
+try {
+  dataSource = await notionRequest(
+    `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}`
+  );
+} catch (error) {
+  fail(error.message);
+}
+
+const dataSourceTitle =
+  dataSource?.title?.map((item) => item.plain_text).join("") ||
+  "Untitled";
+
+console.log(`Connected to: ${dataSourceTitle}`);
+
+
+/* ============================================================
+ * Step 3: Validate the Notion schema
+ * ============================================================
+ */
+
+console.log("\nStep 2: Validating Notion schema...");
+
+const notionProperties = dataSource.properties || {};
+
+let schemaErrors = 0;
+
+for (const [propertyName, expectedType] of Object.entries(
+  REQUIRED_PROPERTIES
+)) {
+  const property = notionProperties[propertyName];
+
+  if (!property) {
+    console.error(
+      `  MISSING: ${propertyName} (expected ${expectedType})`
+    );
+    schemaErrors++;
+    continue;
+  }
+
+  if (property.type !== expectedType) {
+    console.error(
+      `  WRONG TYPE: ${propertyName} — expected ${expectedType}, found ${property.type}`
+    );
+    schemaErrors++;
+    continue;
+  }
+
+  console.log(
+    `  ✓ ${propertyName} (${expectedType})`
   );
 }
 
-// ============================================================
-// Write YAML
-// ============================================================
-
-function writeYaml(records) {
-  const yamlText = yaml.dump(records, {
-    noRefs: true,
-    lineWidth: -1,
-    sortKeys: false,
-  });
-
-  fs.writeFileSync(YAML_PATH, yamlText, "utf8");
+if (schemaErrors > 0) {
+  fail(
+    `Schema validation failed with ${schemaErrors} problem(s).`
+  );
 }
 
-// ============================================================
-// Main
-// ============================================================
+console.log("Schema validation passed.");
 
-async function main() {
-  console.log("==============================================");
-  console.log("Zodi Bell Vocabulary — Notion → YAML Export");
-  console.log("==============================================");
-  console.log(`Data source: ${DATA_SOURCE_ID}`);
-  console.log(`YAML file: ${YAML_PATH}`);
-  console.log(`Notion API version: ${NOTION_VERSION}`);
-  console.log();
 
-  if (PREVIEW) {
-    console.log("PREVIEW MODE");
-    console.log("No changes will be made to vocabulary.yml.");
+/* ============================================================
+ * Step 4: Fetch all Notion pages
+ * ============================================================
+ */
+
+console.log("\nStep 3: Fetching vocabulary records...");
+
+const pages = [];
+let startCursor = undefined;
+
+while (true) {
+  const body = {
+    page_size: 100,
+  };
+
+  if (startCursor) {
+    body.start_cursor = startCursor;
+  }
+
+  const result = await notionRequest(
+    `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}/query`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    }
+  );
+
+  pages.push(...(result.results || []));
+
+  if (!result.has_more) {
+    break;
+  }
+
+  startCursor = result.next_cursor;
+}
+
+console.log(`Found ${pages.length} records.`);
+
+
+/* ============================================================
+ * Step 5: Convert Notion records to YAML records
+ * ============================================================
+ */
+
+console.log("\nStep 4: Converting records...");
+
+const vocabulary = pages.map(pageToVocabularyRecord);
+
+console.log(`Converted ${vocabulary.length} records.`);
+
+
+/* ============================================================
+ * Step 6: Validate exported vocabulary
+ * ============================================================
+ */
+
+console.log("\nStep 5: Validating exported vocabulary...");
+
+let validationErrors = 0;
+
+const seenTerms = new Map();
+
+for (const record of vocabulary) {
+  /*
+   * Every record must have a term.
+   */
+  if (!record.term) {
+    console.error(
+      `  ERROR: Found a record without a Term.`
+    );
+    validationErrors++;
+    continue;
+  }
+
+  /*
+   * Check for duplicate terms.
+   */
+  const normalized = normalizeTerm(record.term);
+
+  if (seenTerms.has(normalized)) {
+    console.error(
+      `  DUPLICATE TERM: "${record.term}"`
+    );
+    console.error(
+      `    Existing page: ${seenTerms.get(normalized)}`
+    );
+    validationErrors++;
   } else {
-    console.log("WRITE MODE");
-    console.log("vocabulary.yml WILL be replaced with the Notion export.");
+    seenTerms.set(normalized, record.term);
   }
-
-  console.log("==============================================\n");
-
-  // ----------------------------------------------------------
-  // Step 1: Verify the Notion data source
-  // ----------------------------------------------------------
-
-  const dataSource = await fetchDataSource();
-
-  // ----------------------------------------------------------
-  // Step 2: Verify the Notion schema
-  // ----------------------------------------------------------
-
-  validateSchema(dataSource);
-
-  // ----------------------------------------------------------
-  // Step 3: Fetch all records
-  // ----------------------------------------------------------
-
-  const pages = await fetchAllPages();
-
-  if (pages.length === 0) {
-    console.error(
-      "\nERROR: No Vocabulary records were found in Notion."
-    );
-
-    console.error(
-      "The YAML file will not be changed."
-    );
-
-    process.exit(1);
-  }
-
-  // ----------------------------------------------------------
-  // Step 4: Convert Notion records to vocabulary records
-  // ----------------------------------------------------------
-
-  console.log("\nConverting Notion records to YAML records...");
-
-  const records = pages.map(pageToVocabularyRecord);
-
-  console.log(`✓ Converted ${records.length} record(s).`);
-
-  // ----------------------------------------------------------
-  // Step 5: Validate records
-  // ----------------------------------------------------------
-
-  validateVocabulary(records);
-
-  // ----------------------------------------------------------
-  // Step 6: Sort alphabetically
-  // ----------------------------------------------------------
-
-  const sortedRecords = sortVocabulary(records);
-
-  // ----------------------------------------------------------
-  // Step 7: Show export plan
-  // ----------------------------------------------------------
-
-  console.log("\n==============================================");
-  console.log("EXPORT PLAN");
-  console.log("==============================================");
-
-  sortedRecords.forEach((record) => {
-    console.log(`EXPORT: ${record.term}`);
-  });
-
-  console.log("\n==============================================");
-  console.log("EXPORT SUMMARY");
-  console.log("==============================================");
-
-  console.log(`Records in Notion: ${sortedRecords.length}`);
-  console.log(`Records to export:  ${sortedRecords.length}`);
-  console.log(`Destination:        ${YAML_PATH}`);
-
-  // ----------------------------------------------------------
-  // Step 8: Preview or write
-  // ----------------------------------------------------------
-
-  if (PREVIEW) {
-    console.log("\nNo changes were made to vocabulary.yml.");
-    return;
-  }
-
-  console.log("\nWriting vocabulary.yml...");
-
-  writeYaml(sortedRecords);
-
-  console.log("✓ vocabulary.yml updated successfully.");
-
-  console.log("\n==============================================");
-  console.log("EXPORT COMPLETE");
-  console.log("==============================================");
 }
 
-main().catch((error) => {
-  console.error("\nERROR:");
-  console.error(error.message);
-  process.exit(1);
+
+/*
+ * Validate expected fields.
+ *
+ * We intentionally do not require optional fields such as
+ * etymology or URL to contain values.
+ */
+for (const record of vocabulary) {
+  if (!record.term) {
+    continue;
+  }
+
+  if (!record.source_preference) {
+    console.error(
+      `  WARNING: ${record.term} has no Source Preference.`
+    );
+  }
+
+  if (!record.short_definition) {
+    console.error(
+      `  WARNING: ${record.term} has no Short Definition.`
+    );
+  }
+
+  if (!record.part_of_speech) {
+    console.error(
+      `  WARNING: ${record.term} has no Part of Speech.`
+    );
+  }
+
+  if (!record.source) {
+    console.error(
+      `  WARNING: ${record.term} has no Source.`
+    );
+  }
+}
+
+if (validationErrors > 0) {
+  fail(
+    `Validation failed with ${validationErrors} error(s).`
+  );
+}
+
+console.log("Validation passed.");
+
+
+/* ============================================================
+ * Step 7: Sort alphabetically
+ * ============================================================
+ */
+
+console.log("\nStep 6: Sorting vocabulary alphabetically...");
+
+vocabulary.sort((a, b) =>
+  a.term.localeCompare(b.term, undefined, {
+    sensitivity: "base",
+  })
+);
+
+console.log("Alphabetical sorting complete.");
+
+
+/* ============================================================
+ * Step 8: Show export plan
+ * ============================================================
+ */
+
+console.log("\nStep 7: Export plan");
+console.log("----------------------------------------");
+
+for (const record of vocabulary) {
+  console.log(`  ${record.term}`);
+}
+
+console.log("----------------------------------------");
+console.log(`Total records: ${vocabulary.length}`);
+
+
+/* ============================================================
+ * Step 9: Preview / write
+ * ============================================================
+ */
+
+if (PREVIEW) {
+  console.log("\n========================================");
+  console.log("PREVIEW COMPLETE");
+  console.log("========================================");
+
+  console.log(
+    `\nNo files were changed. ${vocabulary.length} records would be exported to:`
+  );
+
+  console.log(`  ${OUTPUT_FILE}\n`);
+
+  process.exit(0);
+}
+
+
+/*
+ * Convert to YAML.
+ *
+ * noCompatMode keeps the output straightforward and readable.
+ */
+const yamlOutput = yaml.dump(vocabulary, {
+  noRefs: true,
+  noCompatMode: true,
+  lineWidth: -1,
 });
+
+
+/*
+ * Write the YAML file.
+ */
+console.log("\nStep 8: Writing YAML...");
+
+fs.writeFileSync(
+  OUTPUT_FILE,
+  yamlOutput,
+  "utf8"
+);
+
+console.log(`Wrote ${OUTPUT_FILE}`);
+
+
+/* ============================================================
+ * Step 10: Final summary
+ * ============================================================
+ */
+
+console.log("\n========================================");
+console.log("EXPORT COMPLETE");
+console.log("========================================");
+
+console.log(`Records exported: ${vocabulary.length}`);
+console.log(`Output file:      ${OUTPUT_FILE}`);
+
+console.log("\nNotion remains the source of truth.");
+console.log("The Jekyll site can continue reading _data/vocabulary.yml.\n");
