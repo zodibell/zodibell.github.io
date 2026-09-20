@@ -1,356 +1,339 @@
----
 - term: anarcho-syndicalism
   source_preference: wikipedia
-  short_definition: An anarchist organizational model that centers trade unions as
-    a vehicle for class conflict.
+  short_definition: An anarchist organizational model that centers trade unions as a vehicle for class conflict.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Anarcho-syndicalism
   tags:
-  - nouns
-  - politics
-  - Marxism
+    - nouns
+    - politics
+    - Marxism
   term_lc: anarcho-syndicalism
 - term: athanasia
   source_preference: dictionary
   short_definition: Immortality.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/athanasia
   tags:
-  - nouns
+    - nouns
   term_lc: athanasia
 - term: clerisy
   source_preference: dictionary
   short_definition: An elite group of intellectuals; learned people, the literati.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/clerisy
   tags:
-  - nouns
-  - groups
-  - positives
+    - nouns
+    - groups
+    - positives
   term_lc: clerisy
 - term: communism
   source_preference: wikipedia
-  short_definition: A political and economic ideology whose goal is the creation of
-    a communist society, a socioeconomic order centered on common ownership of the
-    means of production, distribution, and exchange that allocates products in society
-    based on need.
+  short_definition: A political and economic ideology whose goal is the creation of a communist society, a socioeconomic order centered on common ownership of the means of production, distribution, and exchange that allocates products in society based on need.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Communism
   tags:
-  - nouns
-  - fascism
-  - politics
-  - Marxism
-  - antifascism
+    - nouns
+    - fascism
+    - politics
+    - Marxism
+    - antifascism
   term_lc: communism
 - term: cyclothymic
   source_preference: dictionary
   short_definition: Having mood swings between happy and sad.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Cyclothymia
   tags:
-  - adjectives
+    - adjectives
   term_lc: cyclothymic
 - term: effulgent
   source_preference: dictionary
   short_definition: Radiant, resplendent, shining.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/effulgent
   tags:
-  - adjectives
+    - adjectives
   term_lc: effulgent
 - term: eidolon
   source_preference: dictionary
-  short_definition: An image or representation of an idea; a representation of an
-    ideal form; an apparition of some actual or imaginary entity, or of some aspect
-    of reality.
+  short_definition: An image or representation of an idea; a representation of an ideal form; an apparition of some actual or imaginary entity, or of some aspect of reality.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/eidolon
   tags:
-  - nouns
+    - nouns
   term_lc: eidolon
 - term: emulous
   source_preference: dictionary
   short_definition: Ambitious or competitive.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/emulous
   tags:
-  - adjectives
+    - adjectives
   term_lc: emulous
 - term: epulation
   source_preference: dictionary
-  short_definition: "(obsolete) A feast or banquet."
+  short_definition: (obsolete) A feast or banquet.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/epulation
   tags:
-  - nouns
+    - nouns
   term_lc: epulation
 - term: espieglerie
   source_preference: dictionary
   short_definition: Impish or playful behaviour; mischief.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/espieglerie
   tags:
-  - nouns
+    - nouns
   term_lc: espieglerie
 - term: esurient
   source_preference: dictionary
   short_definition: One who is greedy or hungry.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/esurient
   tags:
-  - adjectives
+    - adjectives
   term_lc: esurient
 - term: expostulate
   source_preference: dictionary
-  short_definition: "(intransitive) To protest or remonstrate; to reason earnestly
-    with a person on some impropriety of conduct [(often) with with]."
+  short_definition: (intransitive) To protest or remonstrate; to reason earnestly with a person on some impropriety of conduct [(often) with with].
   part_of_speech: verb
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/expostulate
   tags:
-  - verbs
+    - verbs
   term_lc: expostulate
 - term: fascism
   source_preference: wikipedia
-  short_definition: A far-right, authoritarian, and ultranationalist political ideology
-    and movement that rose to prominence in early-20th-century Europe.
+  short_definition: A far-right, authoritarian, and ultranationalist political ideology and movement that rose to prominence in early-20th-century Europe.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Fascism
   tags:
-  - nouns
-  - fascism
-  - politics
+    - nouns
+    - fascism
+    - politics
   term_lc: fascism
 - term: gelid
   source_preference: dictionary
   short_definition: Very cold; icy or frosty.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/gelid
   tags:
-  - adjectives
+    - adjectives
   term_lc: gelid
 - term: Gestapo
   source_preference: wikipedia
-  short_definition: The official secret police of Nazi Germany and in German-occupied
-    Europe.
+  short_definition: The official secret police of Nazi Germany and in German-occupied Europe.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Gestapo
   tags:
-  - nouns
-  - negatives
-  - fascism
+    - nouns
+    - negatives
+    - fascism
   term_lc: gestapo
 - term: inchoate
   source_preference: dictionary
   short_definition: Being in a beginning or early stage; incipient.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/inchoate
   tags:
-  - adjectives
+    - adjectives
   term_lc: inchoate
 - term: insouciant
   source_preference: dictionary
   short_definition: Casually unconcerned; carefree, indifferent, nonchalant.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/insouciant
   tags:
-  - adjectives
+    - adjectives
   term_lc: insouciant
 - term: meretricious
   source_preference: dictionary
-  short_definition: Tastelessly gaudy; superficially attractive but having in reality
-    no value or substance; falsely alluring.
+  short_definition: Tastelessly gaudy; superficially attractive but having in reality no value or substance; falsely alluring.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/meretricious
   tags:
-  - adjectives
+    - adjectives
   term_lc: meretricious
 - term: noumena
   source_preference: dictionary
-  short_definition: A thing as it is independent of any conceptualization or perception
-    by the human mind, postulated by practical reason but existing in a condition
-    which is in principle unknowable and unexperienceable.
+  short_definition: A thing as it is independent of any conceptualization or perception by the human mind, postulated by practical reason but existing in a condition which is in principle unknowable and unexperienceable.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/noumena
   tags:
-  - nouns
+    - nouns
   term_lc: noumena
 - term: ostentiferous
   source_preference: dictionary
   short_definition: That which brings omens, monsters, or strange manifestations.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
-  url:
+  url: null
   tags:
-  - adjectives
+    - adjectives
   term_lc: ostentiferous
 - term: pellucid
   source_preference: dictionary
   short_definition: Allowing the passage of light; transparent.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/pellucid
   tags:
-  - adjectives
+    - adjectives
   term_lc: pellucid
 - term: perfidious
   source_preference: dictionary
-  short_definition: Of, pertaining to, or representing perfidy; disloyal to what should
-    command one's fidelity or allegiance.
+  short_definition: Of, pertaining to, or representing perfidy; disloyal to what should command one's fidelity or allegiance.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perfidious
   tags:
-  - adjectives
+    - adjectives
   term_lc: perfidious
 - term: perhorresce
   source_preference: dictionary
-  short_definition: "(rare, formal, ambitransitive) To shudder (at). [from 19th c.]"
+  short_definition: (rare, formal, ambitransitive) To shudder (at). [from 19th c.]
   part_of_speech: verb
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perhorresce
   tags:
-  - noun
+    - noun
   term_lc: perhorresce
 - term: perspicacious
   source_preference: dictionary
   short_definition: Of acute discernment; having keen insight; mentally perceptive.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/perspicacious
   tags:
-  - adjectives
+    - adjectives
   term_lc: perspicacious
 - term: proletariat
   source_preference: wikipedia
-  short_definition: Members of a society whose possession of significant economic
-    value is their labor power.
+  short_definition: Members of a society whose possession of significant economic value is their labor power.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: Wikipedia.org
   url: https://en.wikipedia.org/wiki/Proletariat
   tags:
-  - nouns
-  - groups
-  - politics
-  - Marxism
-  - antifascism
+    - nouns
+    - groups
+    - politics
+    - Marxism
+    - antifascism
   term_lc: proletariat
 - term: rebarbative
   source_preference: dictionary
   short_definition: Irritating, repellent.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/rebarbative
   tags:
-  - adjectives
+    - adjectives
   term_lc: rebarbative
 - term: roborant
   source_preference: dictionary
   short_definition: A restorative tonic.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/roborant
   tags:
-  - nouns
-  - positives
+    - nouns
+    - positives
   term_lc: roborant
 - term: segnity
   source_preference: dictionary
   short_definition: Sluggishness; negligence, slowness, slothfulness; also barrenness.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: Wiktionary.org
   url: https://en.wiktionary.org/wiki/segnity
   tags:
-  - nouns
-  - negatives
+    - nouns
+    - negatives
   term_lc: segnity
 - term: sinecure
   source_preference: dictionary
-  short_definition: A position that requires no work but still gives an ample payment;
-    a cushy job.
+  short_definition: A position that requires no work but still gives an ample payment; a cushy job.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/sinecure
   tags:
-  - nouns
-  - positives
+    - nouns
+    - positives
   term_lc: sinecure
 - term: solipsism
   source_preference: dictionary
-  short_definition: "(philosophy) The idea that the self is all that exists or that
-    can be proven to exist."
+  short_definition: (philosophy) The idea that the self is all that exists or that can be proven to exist.
   part_of_speech: noun
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/solipsism
   tags:
-  - nouns
+    - nouns
   term_lc: solipsism
 - term: stochastic
   source_preference: dictionary
   short_definition: Random, randomly determined.
   part_of_speech: adjective
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/stochastic
   tags:
-  - adjectives
+    - adjectives
   term_lc: stochastic
 - term: truckle
   source_preference: dictionary
   short_definition: To be servile or submissive.
   part_of_speech: verb
-  etymology:
+  etymology: null
   source: FreeDictionaryAPI.com
   url: https://www.thefreedictionary.com/truckle
   tags:
-  - verbs
+    - verbs
   term_lc: truckle
