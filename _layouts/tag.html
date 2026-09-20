@@ -7,22 +7,6 @@ layout: default
 <!-- 1️⃣ Blog posts for this tag -->
 {% assign tag_key = page.tag | downcase %}
 
-<!-- TEMPORARY DEBUG -->
-<p>DEBUG page.tag: [{{ page.tag }}]</p>
-<p>DEBUG tag_key: [{{ tag_key }}]</p>
-
-{% for entry in site.data.vocabulary_normalized %}
-  {% if entry.term == "communism" %}
-    <p>DEBUG communism tags:</p>
-    <ul>
-      {% for entry_tag in entry.tags %}
-        <li>[{{ entry_tag }}] → [{{ entry_tag | downcase }}]</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endfor %}
-<!-- END TEMPORARY DEBUG -->
-
 {% assign tagged_posts = site.posts | where_exp: "post", "post.tags contains tag_key" %}
 {% assign post_count = tagged_posts | size %}
 
@@ -39,52 +23,25 @@ layout: default
 {% endif %}
 
 <!-- 2️⃣ Vocabulary entries for this tag -->
-{% assign vocab_entries = site.data.vocabulary_normalized | sort: "term_lc" %}
-{% assign vocab_count = 0 %}
+{% assign vocab_entries = site.data.vocabulary_normalized
+  | where_exp: "entry", "entry.tags_lc contains tag_key" %}
 
-{% if vocab_entries.size > 0 %}
-  {% for entry in vocab_entries %}
-    {% assign entry_matches = false %}
-
-    {% for entry_tag in entry.tags %}
-      {% assign entry_tag_lc = entry_tag | downcase %}
-      {% if entry_tag_lc == tag_key %}
-        {% assign entry_matches = true %}
-        {% break %}
-      {% endif %}
-    {% endfor %}
-
-    {% if entry_matches %}
-      {% assign vocab_count = vocab_count | plus: 1 %}
-    {% endif %}
-  {% endfor %}
-{% endif %}
+{% assign vocab_entries = vocab_entries | sort: "term_lc" %}
+{% assign vocab_count = vocab_entries | size %}
 
 {% if vocab_count > 0 %}
   <h2>Vocabulary</h2>
   <ul>
     {% for entry in vocab_entries %}
-      {% assign entry_matches = false %}
-
-      {% for entry_tag in entry.tags %}
-        {% assign entry_tag_lc = entry_tag | downcase %}
-        {% if entry_tag_lc == tag_key %}
-          {% assign entry_matches = true %}
-          {% break %}
+      <li>
+        {% if entry.url %}
+          <a href="{{ entry.url }}" target="_blank" rel="noopener">{{ entry.term }}</a>
+        {% else %}
+          {{ entry.term }}
         {% endif %}
-      {% endfor %}
-
-      {% if entry_matches %}
-        <li>
-          {% if entry.url %}
-            <a href="{{ entry.url }}" target="_blank" rel="noopener">{{ entry.term }}</a>
-          {% else %}
-            {{ entry.term }}
-          {% endif %}
-          {% if entry.part_of_speech %}<em>({{ entry.part_of_speech }})</em>{% endif %}
-          {% if entry.short_definition %} — {{ entry.short_definition }}{% endif %}
-        </li>
-      {% endif %}
+        {% if entry.part_of_speech %}<em>({{ entry.part_of_speech }})</em>{% endif %}
+        {% if entry.short_definition %} — {{ entry.short_definition }}{% endif %}
+      </li>
     {% endfor %}
   </ul>
 {% endif %}

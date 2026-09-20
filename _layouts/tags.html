@@ -26,12 +26,15 @@ title: All Tags
 
 <ul>
   {% for tag in vocab_tags_unique %}
+    {% assign tag_key = tag | downcase %}
     {% assign count = 0 %}
+
     {% for entry in site.data.vocabulary_normalized %}
-      {% if entry.tags contains tag %}
+      {% if entry.tags_lc contains tag_key %}
         {% assign count = count | plus: 1 %}
       {% endif %}
     {% endfor %}
+
     {% assign slug = tag | downcase | slugify %}
     <li>
       <a href="{{ '/tags/' | append: slug | append: '/' | relative_url }}">{{ tag }}</a> ({{ count }} vocab)
@@ -53,6 +56,8 @@ title: All Tags
 
   <ul class="tag-column">
     {% for tag in first_column %}
+      {% assign tag_key = tag | downcase %}
+
       {% assign post_count = 0 %}
       {% for post in site.posts %}
         {% if post.tags contains tag %}
@@ -62,7 +67,7 @@ title: All Tags
 
       {% assign vocab_count = 0 %}
       {% for entry in site.data.vocabulary_normalized %}
-        {% if entry.tags contains tag %}
+        {% if entry.tags_lc contains tag_key %}
           {% assign vocab_count = vocab_count | plus: 1 %}
         {% endif %}
       {% endfor %}
@@ -78,6 +83,8 @@ title: All Tags
 
   <ul class="tag-column">
     {% for tag in second_column %}
+      {% assign tag_key = tag | downcase %}
+
       {% assign post_count = 0 %}
       {% for post in site.posts %}
         {% if post.tags contains tag %}
@@ -87,7 +94,7 @@ title: All Tags
 
       {% assign vocab_count = 0 %}
       {% for entry in site.data.vocabulary_normalized %}
-        {% if entry.tags contains tag %}
+        {% if entry.tags_lc contains tag_key %}
           {% assign vocab_count = vocab_count | plus: 1 %}
         {% endif %}
       {% endfor %}
