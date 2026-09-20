@@ -23,5 +23,9 @@
   },
   "devDependencies": {
     "uglify-js": "^3.17.4"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.1",
+    "js-yaml": "^5.4.2"
   }
 }
