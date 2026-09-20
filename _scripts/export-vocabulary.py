@@ -416,6 +416,18 @@ def convert_pages(pages):
 
     print()
 
+    # --------------------------------------------------------
+    # Sort alphabetically by term
+    # --------------------------------------------------------
+    #
+    # Notion does not guarantee the order in which records
+    # are returned. Sorting here keeps vocabulary.yml stable
+    # and prevents unnecessary Git diffs.
+    #
+    records.sort(
+        key=lambda record: record["term"].lower()
+    )
+
     return records
 
 
