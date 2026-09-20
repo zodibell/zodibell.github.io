@@ -22,9 +22,20 @@ layout: default
 {% endif %}
 
 <!-- 2️⃣ Vocabulary entries for this tag -->
-{% assign vocab_entries = site.data.vocabulary_normalized | where_exp: "entry", "entry.tags contains tag_key" %}
+{% assign vocab_entries = "" | split: "" %}
+
+{% for entry in site.data.vocabulary_normalized %}
+  {% for entry_tag in entry.tags %}
+    {% assign entry_tag_lc = entry_tag | downcase %}
+    {% if entry_tag_lc == tag_key %}
+      {% assign vocab_entries = vocab_entries | push: entry %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
 
 {% assign vocab_entries = vocab_entries | sort: "term_lc" %}
+
 {% if vocab_entries.size > 0 %}
   <h2>Vocabulary</h2>
   <ul>
