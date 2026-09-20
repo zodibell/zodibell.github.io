@@ -81,8 +81,7 @@ plugins:
   - jekyll-include-cache
   - jekyll-paginate
   - jekyll-target-blank
-  - jekyll-archives
-
+ 
 # Pagination settings
 paginate: 9 # Posts per page
 paginate_path: "/page:num"

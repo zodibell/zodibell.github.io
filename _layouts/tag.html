@@ -22,7 +22,7 @@ layout: default
 {% endif %}
 
 <!-- 2️⃣ Vocabulary entries for this tag -->
-{% assign vocab_entries = site.data.vocabulary | where_exp: "entry", "entry.tags contains tag_key" %}
+{% assign vocab_entries = site.data.vocabulary_normalized | where_exp: "entry", "entry.tags contains tag_key" %}
 
 {% assign vocab_entries = vocab_entries | sort: "term_lc" %}
 {% if vocab_entries.size > 0 %}

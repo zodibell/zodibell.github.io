@@ -21,13 +21,13 @@ title: All Tags
 
 <!-- 2️⃣ Vocabulary Tags -->
 <h2>Vocabulary Tags</h2>
-{% assign vocab_tags_all = site.data.vocabulary | map: 'tags' | compact | flatten %}
+{% assign vocab_tags_all = site.data.vocabulary_normalized | map: 'tags' | compact | flatten %}
 {% assign vocab_tags_unique = vocab_tags_all | uniq | sort_natural %}
 
 <ul>
   {% for tag in vocab_tags_unique %}
     {% assign count = 0 %}
-    {% for entry in site.data.vocabulary %}
+    {% for entry in site.data.vocabulary_normalized %}
       {% if entry.tags contains tag %}
         {% assign count = count | plus: 1 %}
       {% endif %}
@@ -61,7 +61,7 @@ title: All Tags
       {% endfor %}
 
       {% assign vocab_count = 0 %}
-      {% for entry in site.data.vocabulary %}
+      {% for entry in site.data.vocabulary_normalized %}
         {% if entry.tags contains tag %}
           {% assign vocab_count = vocab_count | plus: 1 %}
         {% endif %}
@@ -86,7 +86,7 @@ title: All Tags
       {% endfor %}
 
       {% assign vocab_count = 0 %}
-      {% for entry in site.data.vocabulary %}
+      {% for entry in site.data.vocabulary_normalized %}
         {% if entry.tags contains tag %}
           {% assign vocab_count = vocab_count | plus: 1 %}
         {% endif %}

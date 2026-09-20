@@ -24,7 +24,6 @@ group :jekyll_plugins do
   gem "jekyll-paginate"
   gem "jekyll-include-cache"
   gem "jekyll-target-blank"
-  gem "jekyll-archives"
 end
 
 # ------------------------------------------------------------
