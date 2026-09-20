@@ -3,7 +3,7 @@ import fs from "fs";
 import * as yaml from "js-yaml";
 
 /*
- * Vocabulary Export — Notion → Jekyll Normalized YAML
+ * Vocabulary Export — Notion → Jekyll YAML
  *
  * Purpose:
  *   Export the Notion Vocabulary database directly to:
@@ -12,10 +12,17 @@ import * as yaml from "js-yaml";
  *
  * Notion is the source of truth.
  *
- * The exporter performs both the export and the normalization that
- * was previously handled by _plugins/normalize_vocab.rb.
+ * The exported YAML is the file Jekyll reads directly.
  *
- * The data flow is:
+ * IMPORTANT:
+ *
+ *   There is intentionally NO intermediate:
+ *
+ *     _data/vocabulary.yml
+ *
+ *   and there is NO longer a Jekyll normalization plugin.
+ *
+ *   The complete workflow is:
  *
  *     Notion
  *       ↓
@@ -26,60 +33,35 @@ import * as yaml from "js-yaml";
  *     Jekyll
  *
  *
- * MODES:
+ * MODES
+ * ============================================================
  *
  * Preview:
+ *
  *   node _scripts/export-vocabulary.mjs --preview
- *
- * Write:
- *   node _scripts/export-vocabulary.mjs
- *
  *
  * Preview mode:
  *   - Reads from Notion
- *   - Validates the database
+ *   - Validates the Notion database
  *   - Converts records
- *   - Normalizes records
- *   - Checks for duplicate terms
- *   - Sorts the records
+ *   - Validates vocabulary data
  *   - Shows the export plan
  *   - Does NOT modify any files
  *
  *
+ * Write:
+ *
+ *   node _scripts/export-vocabulary.mjs
+ *
  * Write mode:
- *   - Performs all of the same validation and normalization
- *   - Writes the normalized records to:
+ *   - Performs all of the same validation
+ *   - Writes the exported records to:
  *
  *       _data/vocabulary_normalized.yml
  *
  *
- * NORMALIZATION:
- *
- *   The exporter intentionally preserves the displayed Term exactly
- *   as it appears in Notion.
- *
- *   For example:
- *
- *       Gestapo  → term: Gestapo
- *       Marxism  → term: Marxism
- *       Houston  → term: Houston
- *
- *   A separate lowercase helper field is generated:
- *
- *       Gestapo  → term_lc: gestapo
- *       Marxism  → term_lc: marxism
- *       Houston  → term_lc: houston
- *
- *   This means proper-noun capitalization is never lost.
- *
- *   term_lc is used for comparisons and sorting-related operations.
- *
- *
- * The script does not enrich or modify Notion.
- * It is strictly a Notion → normalized YAML export.
- *
- *
- * Expected Notion properties:
+ * NOTION PROPERTIES
+ * ============================================================
  *
  *   Term              → title
  *   Source Preference → select
@@ -91,7 +73,10 @@ import * as yaml from "js-yaml";
  *   Tags              → multi_select
  *
  *
- * Environment variables:
+ * ENVIRONMENT VARIABLES
+ * ============================================================
+ *
+ * Required:
  *
  *   NOTION_TOKEN
  *   NOTION_VOCABULARY_DATA_SOURCE_ID
@@ -101,23 +86,83 @@ import * as yaml from "js-yaml";
  *   NOTION_VERSION
  *
  *
- * IMPORTANT:
- *   This script intentionally preserves the values stored in Notion.
- *   It does not attempt to "clean up" or correct vocabulary data.
+ * NORMALIZATION
+ * ============================================================
  *
- *   The only derived field is term_lc, which is generated from Term
- *   for case-insensitive comparisons.
+ * The exporter preserves the original values from Notion for
+ * display purposes.
+ *
+ * For example:
+ *
+ *   term: Marxism
+ *
+ * remains:
+ *
+ *   term: Marxism
+ *
+ * But a lowercase comparison value is also generated:
+ *
+ *   term_lc: marxism
+ *
+ * The same approach is used for tags.
+ *
+ * Original display values:
+ *
+ *   tags:
+ *     - nouns
+ *     - politics
+ *     - Marxism
+ *
+ * Comparison values:
+ *
+ *   tags_lc:
+ *     - nouns
+ *     - politics
+ *     - marxism
+ *
+ * This allows Jekyll to compare tags case-insensitively while
+ * preserving the capitalization chosen in Notion for display.
+ *
+ *
+ * IMPORTANT:
+ *   This script does not enrich, edit, or otherwise modify Notion.
+ *   It is strictly a Notion → YAML export.
  */
 
 
+/* ============================================================
+ * Configuration
+ * ============================================================
+ */
+
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
-const DATA_SOURCE_ID = process.env.NOTION_VOCABULARY_DATA_SOURCE_ID;
-const NOTION_VERSION = process.env.NOTION_VERSION || "2026-03-11";
 
-const OUTPUT_FILE = "_data/vocabulary_normalized.yml";
-const PREVIEW = process.argv.includes("--preview");
+const DATA_SOURCE_ID =
+  process.env.NOTION_VOCABULARY_DATA_SOURCE_ID;
+
+const NOTION_VERSION =
+  process.env.NOTION_VERSION || "2026-03-11";
+
+/*
+ * Jekyll reads this file directly.
+ */
+const OUTPUT_FILE =
+  "_data/vocabulary_normalized.yml";
+
+/*
+ * Preview mode is enabled when the command includes:
+ *
+ *   --preview
+ */
+const PREVIEW =
+  process.argv.includes("--preview");
 
 
+/*
+ * Expected Notion database schema.
+ *
+ * The exporter validates this before reading the records.
+ */
 const REQUIRED_PROPERTIES = {
   "Term": "title",
   "Source Preference": "select",
@@ -131,13 +176,12 @@ const REQUIRED_PROPERTIES = {
 
 
 /* ============================================================
- * Helpers
+ * General Helpers
  * ============================================================
  */
 
-
 /*
- * Stop the script with an error message.
+ * Stop the script with a clear error message.
  */
 function fail(message) {
   console.error(`\nERROR: ${message}`);
@@ -146,7 +190,7 @@ function fail(message) {
 
 
 /*
- * Headers used for all Notion API requests.
+ * Headers used for Notion API requests.
  */
 function notionHeaders() {
   return {
@@ -158,7 +202,12 @@ function notionHeaders() {
 
 
 /*
- * Make a request to the Notion API and return parsed JSON.
+ * Make a request to the Notion API.
+ *
+ * The function:
+ *   - adds the standard Notion headers
+ *   - parses the JSON response
+ *   - provides a useful error if the request fails
  */
 async function notionRequest(url, options = {}) {
   const response = await fetch(url, {
@@ -187,25 +236,33 @@ async function notionRequest(url, options = {}) {
       data?.error ||
       `HTTP ${response.status}`;
 
-    throw new Error(`Notion API error: ${message}`);
+    throw new Error(
+      `Notion API error: ${message}`
+    );
   }
 
   return data;
 }
 
 
+/* ============================================================
+ * Notion Property Helpers
+ * ============================================================
+ */
+
+
 /*
- * Return the plain text contained in a Notion rich_text property.
+ * Return the plain text contained in a Notion rich_text
+ * property.
  *
- * IMPORTANT:
- * Blank Notion rich-text fields are returned as null rather than
- * an empty string. This preserves the representation used by the
- * vocabulary data.
+ * Blank rich-text fields become null rather than an empty
+ * string.
  */
 function getRichText(property) {
-  const value = property?.rich_text
-    ?.map((item) => item.plain_text)
-    .join("");
+  const value =
+    property?.rich_text
+      ?.map((item) => item.plain_text)
+      .join("");
 
   return value || null;
 }
@@ -222,9 +279,7 @@ function getSelect(property) {
 /*
  * Return the URL from a Notion URL property.
  *
- * IMPORTANT:
- * Blank Notion URL fields are returned as null rather than
- * an empty string.
+ * Blank URL fields become null.
  */
 function getUrl(property) {
   return property?.url || null;
@@ -233,22 +288,12 @@ function getUrl(property) {
 
 /*
  * Return the title text from a Notion title property.
- *
- * IMPORTANT:
- * The value is returned exactly as stored in Notion.
- *
- * We do NOT lowercase or otherwise alter the Term.
- *
- * This is important for proper nouns such as:
- *
- *   Gestapo
- *   Marxism
- *   Houston
  */
 function getTitle(property) {
-  const value = property?.title
-    ?.map((item) => item.plain_text)
-    .join("");
+  const value =
+    property?.title
+      ?.map((item) => item.plain_text)
+      .join("");
 
   return value || null;
 }
@@ -257,7 +302,13 @@ function getTitle(property) {
 /*
  * Return the names from a Notion multi-select property.
  *
- * Tag capitalization is also preserved exactly as stored in Notion.
+ * Example:
+ *
+ *   [
+ *     "nouns",
+ *     "politics",
+ *     "Marxism"
+ *   ]
  */
 function getMultiSelect(property) {
   return (
@@ -268,70 +319,132 @@ function getMultiSelect(property) {
 }
 
 
-/*
- * Normalize a term for comparison.
- *
- * IMPORTANT:
- * This function does NOT modify the displayed Term.
- *
- * Example:
- *
- *   "Gestapo" → "gestapo"
- *   "Marxism" → "marxism"
- *   "Houston" → "houston"
- *
- * The lowercase value is stored separately in term_lc.
+/* ============================================================
+ * Normalization Helpers
+ * ============================================================
  */
-function normalizeTerm(term) {
-  return String(term || "")
+
+
+/*
+ * Normalize a value for comparison.
+ *
+ * This does NOT change the value displayed on the site.
+ *
+ * For example:
+ *
+ *   Marxism
+ *
+ * becomes:
+ *
+ *   marxism
+ *
+ * while the original value remains:
+ *
+ *   Marxism
+ */
+function normalizeTerm(value) {
+  return String(value || "")
     .trim()
     .toLowerCase();
 }
 
 
 /*
- * Convert a Notion page into the normalized YAML vocabulary format.
+ * Normalize every tag in a tag array.
  *
- * The original Term is preserved.
+ * Example:
  *
- * The derived term_lc field replaces the work previously performed
- * by normalize_vocab.rb.
+ *   ["nouns", "politics", "Marxism"]
+ *
+ * becomes:
+ *
+ *   ["nouns", "politics", "marxism"]
+ */
+function normalizeTags(tags) {
+  return tags.map((tag) =>
+    normalizeTerm(tag)
+  );
+}
+
+
+/* ============================================================
+ * Convert Notion Page → Vocabulary Record
+ * ============================================================
+ */
+
+
+/*
+ * Convert one Notion page into the YAML structure used by
+ * Jekyll.
+ *
+ * IMPORTANT:
+ *
+ * The original values are preserved.
+ *
+ * We add lowercase comparison fields separately:
+ *
+ *   term_lc
+ *   tags_lc
+ *
+ * This allows the site to compare values without changing
+ * what visitors see.
  */
 function pageToVocabularyRecord(page) {
   const properties = page.properties;
 
-  const term = getTitle(properties["Term"]);
+  const term =
+    getTitle(properties["Term"]);
+
+  const tags =
+    getMultiSelect(properties["Tags"]);
 
   return {
     term,
-    source_preference: getSelect(properties["Source Preference"]),
-    short_definition: getRichText(properties["Short Definition"]),
-    part_of_speech: getSelect(properties["Part of Speech"]),
-    etymology: getRichText(properties["Etymology"]),
-    source: getSelect(properties["Source"]),
-    url: getUrl(properties["URL"]),
-    tags: getMultiSelect(properties["Tags"]),
+
+    source_preference:
+      getSelect(properties["Source Preference"]),
+
+    short_definition:
+      getRichText(properties["Short Definition"]),
+
+    part_of_speech:
+      getSelect(properties["Part of Speech"]),
+
+    etymology:
+      getRichText(properties["Etymology"]),
+
+    source:
+      getSelect(properties["Source"]),
+
+    url:
+      getUrl(properties["URL"]),
 
     /*
-     * Derived normalization field.
-     *
-     * This does NOT replace term.
-     *
-     * For example:
-     *
-     *   term: Gestapo
-     *   term_lc: gestapo
+     * Preserve the original tag capitalization.
      */
-    term_lc: normalizeTerm(term),
+    tags,
+
+    /*
+     * Lowercase comparison values.
+     *
+     * These are used by Jekyll when matching tag pages.
+     */
+    tags_lc:
+      normalizeTags(tags),
+
+    /*
+     * Lowercase comparison/sorting value for the term.
+     */
+    term_lc:
+      normalizeTerm(term),
   };
 }
 
 
 /* ============================================================
- * Step 1: Validate environment
+ * Step 1: Validate Environment
  * ============================================================
  */
-
 
 console.log("\n========================================");
 console.log("Vocabulary Export — Notion → YAML");
@@ -339,93 +452,135 @@ console.log("========================================\n");
 
 
 if (PREVIEW) {
-  console.log("MODE: Preview (no files will be changed)\n");
+  console.log(
+    "MODE: Preview (no files will be changed)\n"
+  );
 } else {
   console.log("MODE: Write\n");
 }
 
 
+/*
+ * Verify the required environment variables.
+ */
 if (!NOTION_TOKEN) {
-  fail("NOTION_TOKEN is not set in .env");
+  fail(
+    "NOTION_TOKEN is not set in .env"
+  );
 }
 
 
 if (!DATA_SOURCE_ID) {
-  fail("NOTION_VOCABULARY_DATA_SOURCE_ID is not set in .env");
+  fail(
+    "NOTION_VOCABULARY_DATA_SOURCE_ID is not set in .env"
+  );
 }
 
 
-console.log("Environment variables found.");
-console.log(`Notion version: ${NOTION_VERSION}`);
-console.log(`Data source ID: ${DATA_SOURCE_ID}`);
-console.log(`Output file: ${OUTPUT_FILE}\n`);
+console.log(
+  "Environment variables found."
+);
+
+console.log(
+  `Notion version: ${NOTION_VERSION}`
+);
+
+console.log(
+  `Data source ID: ${DATA_SOURCE_ID}`
+);
+
+console.log(
+  `Output file: ${OUTPUT_FILE}\n`
+);
 
 
 /* ============================================================
- * Step 2: Verify the Notion data source
+ * Step 2: Verify the Notion Data Source
  * ============================================================
  */
 
-
-console.log("Step 1: Checking Notion data source...");
+console.log(
+  "Step 1: Checking Notion data source..."
+);
 
 
 let dataSource;
 
 
 try {
-  dataSource = await notionRequest(
-    `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}`
-  );
+  dataSource =
+    await notionRequest(
+      `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}`
+    );
 } catch (error) {
   fail(error.message);
 }
 
 
 const dataSourceTitle =
-  dataSource?.title?.map((item) => item.plain_text).join("") ||
+  dataSource?.title
+    ?.map((item) => item.plain_text)
+    .join("") ||
   "Untitled";
 
 
-console.log(`Connected to: ${dataSourceTitle}`);
+console.log(
+  `Connected to: ${dataSourceTitle}`
+);
 
 
 /* ============================================================
- * Step 3: Validate the Notion schema
+ * Step 3: Validate Notion Schema
  * ============================================================
  */
 
+console.log(
+  "\nStep 2: Validating Notion schema..."
+);
 
-console.log("\nStep 2: Validating Notion schema...");
 
+const notionProperties =
+  dataSource.properties || {};
 
-const notionProperties = dataSource.properties || {};
 
 let schemaErrors = 0;
 
 
-for (const [propertyName, expectedType] of Object.entries(
-  REQUIRED_PROPERTIES
-)) {
-  const property = notionProperties[propertyName];
+for (
+  const [propertyName, expectedType]
+  of Object.entries(REQUIRED_PROPERTIES)
+) {
+  const property =
+    notionProperties[propertyName];
 
+
+  /*
+   * Property does not exist.
+   */
   if (!property) {
     console.error(
       `  MISSING: ${propertyName} (expected ${expectedType})`
     );
 
     schemaErrors++;
+
     continue;
   }
 
+
+  /*
+   * Property exists but has the wrong type.
+   */
   if (property.type !== expectedType) {
     console.error(
       `  WRONG TYPE: ${propertyName} — expected ${expectedType}, found ${property.type}`
     );
 
     schemaErrors++;
+
     continue;
   }
+
 
   console.log(
     `  ✓ ${propertyName} (${expectedType})`
@@ -440,96 +595,142 @@ if (schemaErrors > 0) {
 }
 
 
-console.log("Schema validation passed.");
+console.log(
+  "Schema validation passed."
+);
 
 
 /* ============================================================
- * Step 4: Fetch all Notion pages
+ * Step 4: Fetch All Notion Pages
  * ============================================================
  */
 
-
-console.log("\nStep 3: Fetching vocabulary records...");
+console.log(
+  "\nStep 3: Fetching vocabulary records..."
+);
 
 
 const pages = [];
-let startCursor = undefined;
+
+let startCursor =
+  undefined;
 
 
 while (true) {
+  /*
+   * Notion allows up to 100 records per request.
+   */
   const body = {
     page_size: 100,
   };
 
+
+  /*
+   * Add the cursor when Notion has another page of results.
+   */
   if (startCursor) {
-    body.start_cursor = startCursor;
+    body.start_cursor =
+      startCursor;
   }
 
-  const result = await notionRequest(
-    `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}/query`,
-    {
-      method: "POST",
-      body: JSON.stringify(body),
-    }
+
+  const result =
+    await notionRequest(
+      `https://api.notion.com/v1/data_sources/${DATA_SOURCE_ID}/query`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      }
+    );
+
+
+  pages.push(
+    ...(result.results || [])
   );
 
-  pages.push(...(result.results || []));
 
+  /*
+   * Stop when Notion reports that there are no more pages.
+   */
   if (!result.has_more) {
     break;
   }
 
-  startCursor = result.next_cursor;
+
+  startCursor =
+    result.next_cursor;
+
+
+  /*
+   * Safety check in case Notion says there are more records
+   * but does not provide another cursor.
+   */
+  if (!startCursor) {
+    fail(
+      "Notion reported more records but did not provide a next cursor."
+    );
+  }
 }
 
 
-console.log(`Found ${pages.length} records.`);
+console.log(
+  `Found ${pages.length} records.`
+);
 
 
 /* ============================================================
- * Step 5: Convert and normalize Notion records
+ * Step 5: Convert Notion Records
  * ============================================================
  */
 
-
-console.log("\nStep 4: Converting and normalizing records...");
-
-
-const vocabulary = pages.map(pageToVocabularyRecord);
+console.log(
+  "\nStep 4: Converting records..."
+);
 
 
-console.log(`Converted ${vocabulary.length} records.`);
+const vocabulary =
+  pages.map(
+    pageToVocabularyRecord
+  );
 
 
-/*
- * Show a small confirmation that capitalization is being preserved.
- *
- * This is informational only and does not modify the data.
- */
-console.log("\nNormalization behavior:");
-console.log("  • Term capitalization is preserved.");
-console.log("  • term_lc is generated for lowercase comparison.");
-console.log("  • Tag capitalization is preserved.");
+console.log(
+  `Converted ${vocabulary.length} records.`
+);
 
 
 /* ============================================================
- * Step 6: Validate exported vocabulary
+ * Step 6: Validate Exported Vocabulary
  * ============================================================
  */
 
-
-console.log("\nStep 5: Validating exported vocabulary...");
+console.log(
+  "\nStep 5: Validating exported vocabulary..."
+);
 
 
 let validationErrors = 0;
 
-const seenTerms = new Map();
+
+/*
+ * Track normalized terms so that capitalization differences
+ * cannot create duplicate vocabulary records.
+ *
+ * Example:
+ *
+ *   Marxism
+ *   marxism
+ *   MARXISM
+ *
+ * would be treated as duplicates.
+ */
+const seenTerms =
+  new Map();
 
 
 for (const record of vocabulary) {
-
   /*
-   * Every record must have a term.
+   * Every vocabulary record must have a Term.
    */
   if (!record.term) {
     console.error(
@@ -537,47 +738,33 @@ for (const record of vocabulary) {
     );
 
     validationErrors++;
-    continue;
-  }
 
-
-  /*
-   * term_lc should always exist when term exists.
-   */
-  if (!record.term_lc) {
-    console.error(
-      `  ERROR: ${record.term} does not have a term_lc value.`
-    );
-
-    validationErrors++;
     continue;
   }
 
 
   /*
    * Check for duplicate terms.
-   *
-   * Comparison is case-insensitive.
-   *
-   * Therefore:
-   *
-   *   Gestapo
-   *   gestapo
-   *
-   * would be considered duplicates.
    */
-  if (seenTerms.has(record.term_lc)) {
+  const normalized =
+    normalizeTerm(record.term);
+
+
+  if (seenTerms.has(normalized)) {
     console.error(
       `  DUPLICATE TERM: "${record.term}"`
     );
 
     console.error(
-      `    Existing term: ${seenTerms.get(record.term_lc)}`
+      `    Existing record: ${seenTerms.get(normalized)}`
     );
 
     validationErrors++;
   } else {
-    seenTerms.set(record.term_lc, record.term);
+    seenTerms.set(
+      normalized,
+      record.term
+    );
   }
 }
 
@@ -585,11 +772,10 @@ for (const record of vocabulary) {
 /*
  * Validate expected fields.
  *
- * We intentionally do not require optional fields such as
- * etymology or URL to contain values.
+ * Optional fields such as Etymology and URL are intentionally
+ * allowed to be empty.
  */
 for (const record of vocabulary) {
-
   if (!record.term) {
     continue;
   }
@@ -631,109 +817,140 @@ if (validationErrors > 0) {
 }
 
 
-console.log("Validation passed.");
+console.log(
+  "Validation passed."
+);
 
 
 /* ============================================================
- * Step 7: Sort alphabetically
+ * Step 7: Sort Alphabetically
+ * ============================================================
+ */
+
+console.log(
+  "\nStep 6: Sorting vocabulary alphabetically..."
+);
+
+
+/*
+ * Sort using the lowercase comparison value.
+ *
+ * This means:
+ *
+ *   Gestapo
+ *   Houston
+ *   Marxism
+ *
+ * sort naturally regardless of capitalization.
+ */
+vocabulary.sort(
+  (a, b) =>
+    a.term_lc.localeCompare(
+      b.term_lc
+    )
+);
+
+
+console.log(
+  "Alphabetical sorting complete."
+);
+
+
+/* ============================================================
+ * Step 8: Show Export Plan
+ * ============================================================
+ */
+
+console.log(
+  "\nStep 7: Export plan"
+);
+
+console.log(
+  "----------------------------------------"
+);
+
+
+for (const record of vocabulary) {
+  console.log(
+    `  ${record.term}`
+  );
+}
+
+
+console.log(
+  "----------------------------------------"
+);
+
+console.log(
+  `Total records: ${vocabulary.length}`
+);
+
+
+/* ============================================================
+ * Step 9: Preview / Write
  * ============================================================
  */
 
 
 /*
- * Sort using term_lc rather than modifying the displayed Term.
+ * Preview mode stops here.
  *
- * This means:
- *
- *   Gestapo
- *   Marxism
- *   clerisy
- *
- * retain their original capitalization while still sorting
- * without capitalization affecting the order.
+ * Nothing is written to disk.
  */
-console.log("\nStep 6: Sorting vocabulary alphabetically...");
-
-
-vocabulary.sort((a, b) =>
-  a.term_lc.localeCompare(b.term_lc, undefined, {
-    sensitivity: "base",
-  })
-);
-
-
-console.log("Alphabetical sorting complete.");
-
-
-/* ============================================================
- * Step 8: Show export plan
- * ============================================================
- */
-
-
-console.log("\nStep 7: Export plan");
-console.log("----------------------------------------");
-
-
-for (const record of vocabulary) {
-  console.log(
-    `  ${record.term} → term_lc: ${record.term_lc}`
-  );
-}
-
-
-console.log("----------------------------------------");
-console.log(`Total records: ${vocabulary.length}`);
-
-
-/* ============================================================
- * Step 9: Preview / write
- * ============================================================
- */
-
-
 if (PREVIEW) {
+  console.log(
+    "\n========================================"
+  );
 
-  console.log("\n========================================");
-  console.log("PREVIEW COMPLETE");
-  console.log("========================================");
+  console.log(
+    "PREVIEW COMPLETE"
+  );
+
+  console.log(
+    "========================================"
+  );
 
   console.log(
     `\nNo files were changed. ${vocabulary.length} records would be exported to:`
   );
 
-  console.log(`  ${OUTPUT_FILE}\n`);
+  console.log(
+    `  ${OUTPUT_FILE}\n`
+  );
 
   process.exit(0);
 }
 
 
 /*
- * Convert to YAML.
+ * Convert the vocabulary records to YAML.
  *
  * noRefs:
  *   Prevents YAML anchors/references.
  *
  * noCompatMode:
- *   Keeps the output straightforward and readable.
+ *   Keeps the YAML output straightforward.
  *
- * lineWidth:
- *   Prevents js-yaml from aggressively wrapping long values.
+ * lineWidth: -1:
+ *   Prevents js-yaml from wrapping long definitions.
  */
-const yamlOutput = yaml.dump(vocabulary, {
-  noRefs: true,
-  noCompatMode: true,
-  lineWidth: -1,
-});
+const yamlOutput =
+  yaml.dump(
+    vocabulary,
+    {
+      noRefs: true,
+      noCompatMode: true,
+      lineWidth: -1,
+    }
+  );
 
 
-/* ============================================================
- * Step 10: Write the normalized YAML file
- * ============================================================
+/*
+ * Write the generated YAML file.
  */
-
-
-console.log("\nStep 8: Writing normalized YAML...");
+console.log(
+  "\nStep 8: Writing YAML..."
+);
 
 
 fs.writeFileSync(
@@ -743,29 +960,42 @@ fs.writeFileSync(
 );
 
 
-console.log(`Wrote ${OUTPUT_FILE}`);
+console.log(
+  `Wrote ${OUTPUT_FILE}`
+);
 
 
 /* ============================================================
- * Step 11: Final summary
+ * Step 10: Final Summary
  * ============================================================
  */
 
+console.log(
+  "\n========================================"
+);
 
-console.log("\n========================================");
-console.log("EXPORT COMPLETE");
-console.log("========================================");
+console.log(
+  "EXPORT COMPLETE"
+);
+
+console.log(
+  "========================================"
+);
 
 
-console.log(`Records exported: ${vocabulary.length}`);
-console.log(`Output file:      ${OUTPUT_FILE}`);
+console.log(
+  `Records exported: ${vocabulary.length}`
+);
+
+console.log(
+  `Output file:      ${OUTPUT_FILE}`
+);
 
 
-console.log("\nNormalization performed by:");
-console.log("  _scripts/export-vocabulary.mjs");
+console.log(
+  "\nNotion remains the source of truth."
+);
 
-
-console.log("\nNotion remains the source of truth.");
 console.log(
   "Jekyll reads _data/vocabulary_normalized.yml directly.\n"
 );
