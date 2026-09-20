@@ -80,7 +80,6 @@ const REQUIRED_PROPERTIES = {
   "Tags": "multi_select",
 };
 
-
 /* ============================================================
  * Helpers
  * ============================================================
@@ -91,7 +90,6 @@ function fail(message) {
   process.exit(1);
 }
 
-
 function notionHeaders() {
   return {
     Authorization: `Bearer ${NOTION_TOKEN}`,
@@ -99,7 +97,6 @@ function notionHeaders() {
     "Content-Type": "application/json",
   };
 }
-
 
 async function notionRequest(url, options = {}) {
   const response = await fetch(url, {
@@ -134,14 +131,13 @@ async function notionRequest(url, options = {}) {
   return data;
 }
 
-
 /*
  * Return the plain text contained in a Notion rich_text property.
  *
  * IMPORTANT:
- * Blank Notion rich-text fields are returned as null rather than
- * an empty string. This preserves the representation used by the
- * original vocabulary.yml file.
+ *   Blank Notion rich-text fields are returned as null rather than
+ *   an empty string. This preserves the representation used by the
+ *   original vocabulary.yml file.
  */
 function getRichText(property) {
   const value = property?.rich_text
@@ -151,7 +147,6 @@ function getRichText(property) {
   return value || null;
 }
 
-
 /*
  * Return the selected value from a Notion select property.
  */
@@ -159,18 +154,16 @@ function getSelect(property) {
   return property?.select?.name ?? null;
 }
 
-
 /*
  * Return the URL from a Notion URL property.
  *
  * IMPORTANT:
- * Blank Notion URL fields are returned as null rather than
- * an empty string.
+ *   Blank Notion URL fields are returned as null rather than
+ *   an empty string.
  */
 function getUrl(property) {
   return property?.url || null;
 }
-
 
 /*
  * Return the title text from a Notion title property.
@@ -183,7 +176,6 @@ function getTitle(property) {
   return value || null;
 }
 
-
 /*
  * Return the names from a Notion multi-select property.
  */
@@ -194,7 +186,6 @@ function getMultiSelect(property) {
       .filter(Boolean) || []
   );
 }
-
 
 /*
  * Normalize terms for comparison.
@@ -207,7 +198,6 @@ function normalizeTerm(term) {
     .trim()
     .toLowerCase();
 }
-
 
 /*
  * Convert a Notion page into the YAML vocabulary format.
@@ -226,7 +216,6 @@ function pageToVocabularyRecord(page) {
     tags: getMultiSelect(properties["Tags"]),
   };
 }
-
 
 /* ============================================================
  * Step 1: Validate environment
@@ -256,13 +245,12 @@ console.log(`Notion version: ${NOTION_VERSION}`);
 console.log(`Data source ID: ${DATA_SOURCE_ID}`);
 console.log(`Output file: ${OUTPUT_FILE}\n`);
 
-
 /* ============================================================
  * Step 2: Verify the Notion data source
  * ============================================================
  */
 
-console.log("Step 1: Checking Notion data source...");
+console.log("Step 2: Checking Notion data source...");
 
 let dataSource;
 
@@ -280,13 +268,12 @@ const dataSourceTitle =
 
 console.log(`Connected to: ${dataSourceTitle}`);
 
-
 /* ============================================================
  * Step 3: Validate the Notion schema
  * ============================================================
  */
 
-console.log("\nStep 2: Validating Notion schema...");
+console.log("\nStep 3: Validating Notion schema...");
 
 const notionProperties = dataSource.properties || {};
 
@@ -326,13 +313,12 @@ if (schemaErrors > 0) {
 
 console.log("Schema validation passed.");
 
-
 /* ============================================================
  * Step 4: Fetch all Notion pages
  * ============================================================
  */
 
-console.log("\nStep 3: Fetching vocabulary records...");
+console.log("\nStep 4: Fetching vocabulary records...");
 
 const pages = [];
 let startCursor = undefined;
@@ -365,25 +351,23 @@ while (true) {
 
 console.log(`Found ${pages.length} records.`);
 
-
 /* ============================================================
  * Step 5: Convert Notion records to YAML records
  * ============================================================
  */
 
-console.log("\nStep 4: Converting records...");
+console.log("\nStep 5: Converting records...");
 
 const vocabulary = pages.map(pageToVocabularyRecord);
 
 console.log(`Converted ${vocabulary.length} records.`);
-
 
 /* ============================================================
  * Step 6: Validate exported vocabulary
  * ============================================================
  */
 
-console.log("\nStep 5: Validating exported vocabulary...");
+console.log("\nStep 6: Validating exported vocabulary...");
 
 let validationErrors = 0;
 
@@ -419,12 +403,13 @@ for (const record of vocabulary) {
   }
 }
 
-
 /*
  * Validate expected fields.
  *
- * We intentionally do not require optional fields such as
- * etymology or URL to contain values.
+ * Term is required because it identifies the vocabulary record.
+ * Other fields generate warnings rather than stopping the export,
+ * allowing incomplete records to be reviewed without preventing
+ * the rest of the vocabulary from being exported.
  */
 for (const record of vocabulary) {
   if (!record.term) {
@@ -464,13 +449,12 @@ if (validationErrors > 0) {
 
 console.log("Validation passed.");
 
-
 /* ============================================================
  * Step 7: Sort alphabetically
  * ============================================================
  */
 
-console.log("\nStep 6: Sorting vocabulary alphabetically...");
+console.log("\nStep 7: Sorting vocabulary alphabetically...");
 
 vocabulary.sort((a, b) =>
   a.term.localeCompare(b.term, undefined, {
@@ -480,13 +464,12 @@ vocabulary.sort((a, b) =>
 
 console.log("Alphabetical sorting complete.");
 
-
 /* ============================================================
  * Step 8: Show export plan
  * ============================================================
  */
 
-console.log("\nStep 7: Export plan");
+console.log("\nStep 8: Export plan");
 console.log("----------------------------------------");
 
 for (const record of vocabulary) {
@@ -495,7 +478,6 @@ for (const record of vocabulary) {
 
 console.log("----------------------------------------");
 console.log(`Total records: ${vocabulary.length}`);
-
 
 /* ============================================================
  * Step 9: Preview / write
@@ -516,7 +498,6 @@ if (PREVIEW) {
   process.exit(0);
 }
 
-
 /*
  * Convert to YAML.
  *
@@ -528,11 +509,10 @@ const yamlOutput = yaml.dump(vocabulary, {
   lineWidth: -1,
 });
 
-
 /*
  * Write the YAML file.
  */
-console.log("\nStep 8: Writing YAML...");
+console.log("\nStep 9: Writing YAML...");
 
 fs.writeFileSync(
   OUTPUT_FILE,
@@ -541,7 +521,6 @@ fs.writeFileSync(
 );
 
 console.log(`Wrote ${OUTPUT_FILE}`);
-
 
 /* ============================================================
  * Step 10: Final summary
