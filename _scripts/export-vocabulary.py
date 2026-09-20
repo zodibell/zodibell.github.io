@@ -5,7 +5,10 @@ import os
 import requests
 import yaml
 from pathlib import Path
+from dotenv import load_dotenv
 
+# Load variables from the repository's .env file.
+load_dotenv()
 
 # ============================================================
 # Configuration
