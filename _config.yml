@@ -91,19 +91,6 @@ collections:
   posts:
     output: true
 
-tag_archive:
-  path: /tags/
-  type: jekyll-archives 
-
-jekyll-archives:
-  enabled:
-    - tags
-  layouts:
-    tag: tag
-  permalinks:
-    tag: /tags/:name/
-
-
 sass:
   sass_dir: "assets/css"  # Ensure this matches your actual SCSS file location
 

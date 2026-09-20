@@ -4,7 +4,7 @@ title: "Bluesky Is Down"
 date: 2026-04-16
 tags:
     - "musings"
-    - “randomness”
+    - randomness
 ---
 
 I usually hop on to BlueSky / BlackSky in the middle of the night to scratch my restless brain. But since it’s down tonight, I figured I would ramble here instead.
