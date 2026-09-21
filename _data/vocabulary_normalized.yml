@@ -26,6 +26,20 @@
   tags_lc:
     - nouns
   term_lc: athanasia
+- term: callipygian
+  source_preference: dictionary
+  short_definition: Having beautifully shaped buttocks.
+  part_of_speech: adjective
+  etymology: Ancient Greek κᾰλός ( kălós ) Ancient Greek κᾰ́λλος ( kắllos ) Proto-Indo-European der. Ancient Greek πῡγή ( pūgḗ ) Ancient Greek -ος ( -os ) Ancient Greek καλλίπυγος ( kallípugos ) bor. Proto-Indo-European *-(i)yós Proto-Italic *-ijos Proto-Italic *-ios Old Latin -ios Latin -ius Proto-Indo-European *-nós Proto-Italic *-nos Proto-Italic *-ānos Latin -ānus Latin -iānus bor. English -ian English callipygian From Ancient Greek καλλίπυγος ( kallípugos ) + -ian , from κάλλος ( kállos , “ beauty ” ) + πυγή ( pugḗ , “ buttocks ” ) .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/callipygian
+  tags:
+    - adjectives
+    - positives
+  tags_lc:
+    - adjectives
+    - positives
+  term_lc: callipygian
 - term: clerisy
   source_preference: dictionary
   short_definition: An elite group of intellectuals; learned people, the literati.
@@ -62,6 +76,16 @@
     - marxism
     - antifascism
   term_lc: communism
+- term: conglobate
+  source_preference: dictionary
+  short_definition: To form or gather into a ball or rounded mass
+  part_of_speech: verb
+  etymology: First attested in 1635; borrowed from Latin conglobātus , perfect passive participial of conglobō (see -ate ( adjective-forming suffix ) and -ate ( verb-forming suffix ) ), from con- ( “ together ” ) + globus ( “ ball ” ) + -ō ( verb-forming suffix )
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/conglobate
+  tags: []
+  tags_lc: []
+  term_lc: conglobate
 - term: cyclothymic
   source_preference: dictionary
   short_definition: Having mood swings between happy and sad.
@@ -174,6 +198,18 @@
     - fascism
     - politics
   term_lc: fascism
+- term: flagitation
+  source_preference: dictionary
+  short_definition: Earnest and persistent asking or demanding; importunity
+  part_of_speech: noun
+  etymology: Latin flagitatio .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/flagitation
+  tags:
+    - nouns
+  tags_lc:
+    - nouns
+  term_lc: flagitation
 - term: gelid
   source_preference: dictionary
   short_definition: Very cold; icy or frosty.
@@ -202,6 +238,20 @@
     - negatives
     - fascism
   term_lc: gestapo
+- term: horaphthia
+  source_preference: dictionary
+  short_definition: An obsessive or neurotic preoccupation with one's youth
+  part_of_speech: noun
+  etymology: null
+  source: null
+  url: null
+  tags:
+    - nouns
+    - negatives
+  tags_lc:
+    - nouns
+    - negatives
+  term_lc: horaphthia
 - term: inchoate
   source_preference: dictionary
   short_definition: Being in a beginning or early stage; incipient.
@@ -226,6 +276,32 @@
   tags_lc:
     - adjectives
   term_lc: insouciant
+- term: laetificate
+  source_preference: dictionary
+  short_definition: To make glad or joyful; to cheer or lift the spirits.
+  part_of_speech: verb
+  etymology: Borrowed from Latin laetificātus , perfect passive participle of laetificō ( “ to be energetic or outgoing ” ) , see -ate ( verb-forming suffix ) .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/laetificate
+  tags:
+    - verbs
+    - positives
+  tags_lc:
+    - verbs
+    - positives
+  term_lc: laetificate
+- term: lychnobite
+  source_preference: dictionary
+  short_definition: One who labors at night and sleeps in the day
+  part_of_speech: noun
+  etymology: From Ancient Greek ( lukhnóbios , “ living by lamplight ” ) , from λύχνος ( lúkhnos , “ lamp ” ) + βίος ( bíos , “ life ” ) ; ending analogical to cenobite .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/lychnobite
+  tags:
+    - nouns
+  tags_lc:
+    - nouns
+  term_lc: lychnobite
 - term: meretricious
   source_preference: dictionary
   short_definition: Tastelessly gaudy; superficially attractive but having in reality no value or substance; falsely alluring.
@@ -238,6 +314,20 @@
   tags_lc:
     - adjectives
   term_lc: meretricious
+- term: nequient
+  source_preference: dictionary
+  short_definition: Unable or incapable of doing something; lacking the necessary skill, means, power, or opportunity
+  part_of_speech: adjective
+  etymology: null
+  source: null
+  url: https://lexicophilia.com/2023/12/03/word-of-the-day-nequient/
+  tags:
+    - negatives
+    - adjectives
+  tags_lc:
+    - negatives
+    - adjectives
+  term_lc: nequient
 - term: noumena
   source_preference: dictionary
   short_definition: A thing as it is independent of any conceptualization or perception by the human mind, postulated by practical reason but existing in a condition which is in principle unknowable and unexperienceable.
@@ -250,6 +340,18 @@
   tags_lc:
     - nouns
   term_lc: noumena
+- term: 'obstreperous '
+  source_preference: dictionary
+  short_definition: Clamorously unruly or boisterous; noisily resistant to control, restraint, or authority
+  part_of_speech: adjective
+  etymology: Proto-Indo-European *h₁ep- der. Proto-Indo-European *h₁éps der. Proto-Indo-European *h₁óp(i) Proto-Italic *op Latin ob Latin ob- Latin strepō Latin obstrepō Proto-Indo-European *-ós Proto-Indo-European *-os Proto-Indo-European *-ós Proto-Indo-European *-ós Proto-Indo-European *-ós Proto-Indo-European *-ós Proto-Indo-European *-os Proto-Italic *-os Archaic Latin -os Latin -us Latin obstreperus bor. English obstreperous Borrowed from Latin obstreperus , first attested circa 17th c. Compare obstropulous .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/obstreperous
+  tags:
+    - adjectives
+  tags_lc:
+    - adjectives
+  term_lc: obstreperous
 - term: ostentiferous
   source_preference: dictionary
   short_definition: That which brings omens, monsters, or strange manifestations.
@@ -310,6 +412,20 @@
   tags_lc:
     - adjectives
   term_lc: perspicacious
+- term: phlyarologist
+  source_preference: dictionary
+  short_definition: A person who habitually talks nonsense; a babbler or purveyor of foolish, meaningless talk
+  part_of_speech: noun
+  etymology: null
+  source: null
+  url: https://www.wordsandphrasesfromthepast.com/word-of-the-day/phlyarologist
+  tags:
+    - negatives
+    - nouns
+  tags_lc:
+    - negatives
+    - nouns
+  term_lc: phlyarologist
 - term: proletariat
   source_preference: wikipedia
   short_definition: Members of a society whose possession of significant economic value is their labor power.
@@ -330,6 +446,60 @@
     - marxism
     - antifascism
   term_lc: proletariat
+- term: psithurism
+  source_preference: dictionary
+  short_definition: The soft susurration of wind whispering through the trees
+  part_of_speech: noun
+  etymology: An adaptation of the Ancient Greek ( psithúrisma ) or ( psithurismós ) , from ψιθυρίζω ( psithurízō , “ I whisper ” ) , from ψίθυρος ( psíthuros , “ whispering, slanderous ” ) .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/psithurism
+  tags:
+    - nouns
+    - sounds
+  tags_lc:
+    - nouns
+    - sounds
+  term_lc: psithurism
+- term: pulchritudinous
+  source_preference: dictionary
+  short_definition: Having great physical beauty; comely or strikingly attractive
+  part_of_speech: adjective
+  etymology: From Latin pulchritūdin- + -ous , from oblique stem of Latin pulchritūdō , from pulcher +‎ -tūdō . By surface analysis , pulchritude +‎ -ous .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/pulchritudinous
+  tags:
+    - adjectives
+    - positives
+  tags_lc:
+    - adjectives
+    - positives
+  term_lc: pulchritudinous
+- term: pyrrhonism
+  source_preference: wikipedia
+  short_definition: Extreme or universal skepticism; profound doubt
+  part_of_speech: noun
+  etymology: null
+  source: Wikipedia.org
+  url: https://en.wikipedia.org/wiki/Pyrrhonism
+  tags:
+    - nouns
+  tags_lc:
+    - nouns
+  term_lc: pyrrhonism
+- term: quisling
+  source_preference: dictionary
+  short_definition: A traitor who collaborates with an enemy or occupying foreign power
+  part_of_speech: noun
+  etymology: Named after Norwegian military officer Vidkun Quisling (1887–1945), who ruled the Nazi collaborationist government of Norway during World War Two. From Quislinus , Latinization of Quislin , based on the Danish place name . This term first appeared in 1940. The surname is seemingly supposed to mean "one who is from Kvislemark", and is equivalent to +‎ -ing ( suffix designating a person of a certain origin or with certain qualities ) . However, the earlier form of the name, Quislinus / Quislin , appears to have been a fanciful coinage based upon + Latin -inus ( “ suffix indicating a relationship of position, possession, or origin ” ) , and only later on came to be reinterpreted as containing Norwegian -ing ( “ suffix designating a person of a certain origin or with certain qualities ” ) . Kvislemark is composed of Danish kvissel ( “ cleft branch ” ) +‎ mark ( compare Danmark ) . kvissel itself is a derivative of Old Norse kvísl ( “ fork [as in a 'fork in the road'] ” ) , which ultimately comes (by dissimilation) from Proto-Germanic . Cognates include Old English twisla ( “ confluence, junction, fork of a river or road ” ) and Old High German ( “ forked implement, twig, branch ” ) . Ultimately related to English twistle , twissel , and twizzle . By surface analysis , quisle +‎ -ing .
+  source: FreeDictionaryAPI.com
+  url: https://freedictionaryapi.com/api/v1/entries/en/quisling
+  tags:
+    - negatives
+    - nouns
+  tags_lc:
+    - negatives
+    - nouns
+  term_lc: quisling
 - term: rebarbative
   source_preference: dictionary
   short_definition: Irritating, repellent.
